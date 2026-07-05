@@ -124,7 +124,7 @@
   @media(max-width:520px){.sym{grid-template-columns:1fr;gap:0}}
 
   /* ---------- schedule ---------- */
-  .sechint{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--navy-2);margin:0 0 10px}
+  .sechint{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--navy-2);margin:0 0 22px}
   .sechint .arw{font-size:14px;opacity:.8}
   .sched{margin-top:12px}
   .sched .r{display:grid;grid-template-columns:96px 1fr;gap:16px;padding:13px 8px 13px 4px;border-top:1px solid var(--line);align-items:baseline;border-radius:6px;position:relative}
@@ -169,32 +169,36 @@
   .rulepair .no-r .zh{color:#8E271C;font-weight:700}
   .rulepair .no-r .id{color:#A5473A}
 
-  /* ---------- detail sections (frameless collapsible) ---------- */
-  .sec{border-top:1px solid var(--line)}
-  .sec>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:17px 2px 15px}
+  /* ---------- detail sections (tappable card rows) ---------- */
+  .sec{background:#EFF1F3;border-radius:10px;margin-bottom:8px;border-top:0;overflow:hidden}
+  .sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:15px 14px;min-height:56px}
+  .sec[open]>summary{padding-bottom:10px}
+  .sec>summary:active{background:#E4E8EC;border-radius:10px}
   .sec>summary::-webkit-details-marker{display:none}
   .sec>summary .t{font-family:"Noto Sans TC",sans-serif;font-weight:700;font-size:17px;color:var(--navy)}
   .sec>summary .en{font-family:"Hanken Grotesk",sans-serif;font-weight:500;font-size:12px;color:var(--navy-2)}
   body.lang-id .sec>summary .en{font-size:16px;color:var(--navy)}
-  .sec>summary .freq{margin-left:auto;font-family:"Noto Sans TC",sans-serif;font-size:13.5px;font-weight:500;color:var(--sub);white-space:nowrap;align-self:center}
-  .sec>summary .chev{flex:0 0 auto;color:var(--faint);transition:transform .2s;font-size:20px;line-height:1;align-self:center;margin-left:6px}
-  .sec[open]>summary .chev{transform:rotate(90deg)}
-  .sec .body{padding:0 2px 20px}
+  .sec>summary .freq{margin-left:auto;font-family:"Noto Sans TC",sans-serif;font-size:13.5px;font-weight:500;color:var(--sub);white-space:nowrap}
+  .sec>summary .chev{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid var(--line-strong);color:var(--navy-2);display:flex;align-items:center;justify-content:center;transition:transform .2s;font-size:12px;line-height:1;margin-left:8px}
+  .sec[open]>summary .chev{transform:rotate(180deg)}
+  .sec .body{margin:2px 12px 12px;padding:8px 16px 14px;background:#fff;border-radius:8px;overflow:hidden}
   ul.items{list-style:none}
   ul.items li{padding:9px 0;border-top:1px solid var(--line)}
   ul.items li:first-child{border-top:0}
   b,strong{font-weight:600;color:var(--ink)}
-  ul.items li.flag{border-left:2px solid var(--danger);padding:9px 0 9px 16px;margin:4px 0}
+  ul.items li.flag{border-left:2px solid var(--danger);padding:9px 16px 9px 16px;margin:4px 0;background:#FBF4F2;border-radius:0 8px 8px 0}
   li.flag .zh{color:#8E271C;font-weight:500}
   li.flag .id{color:#A5473A}
 
-  .sec.jump-hl>summary{animation:landhl 1.6s ease-out}
-  @keyframes landhl{0%{background:#FBEFD3}55%{background:#FBEFD3}100%{background:transparent}}
+  .sec.jump-hl{animation:landhl 1.6s ease-out}
+  @keyframes landhl{0%{background:#FBEFD3}55%{background:#FBEFD3}100%{background:#EFF1F3}}
   .sec{scroll-margin-top:64px}
 
-  .sec.danger-sec{border-top:2px solid var(--danger)}
+  .sec.danger-sec{background:#FAF1EF;border:1px solid var(--danger-soft)}
+  .sec.danger-sec>summary:active{background:#F3E2DE}
   .sec.danger-sec>summary .t{color:var(--danger)}
   .sec.danger-sec>summary .freq{color:var(--danger)}
+  .sec.danger-sec>summary .chev{border-color:var(--danger-soft);color:var(--danger)}
   body.lang-id .sec.danger-sec>summary .t{color:var(--navy)}
   .danger-sec .warnline{color:var(--danger);font-weight:600;font-size:14.5px;margin:2px 0 10px}
 
@@ -260,6 +264,8 @@
     body.scene-hosp .panel[id^="panel-hosp"]{display:block!important}
     .sec>summary .chev{display:none}
     .sec .body,details.sec:not([open]) .body{display:block!important}
+    .sec{background:#fff;border:1px solid #bbb}
+    .sec>summary .chev{display:none}
     .rise{opacity:1!important;transform:none!important;animation:none!important}
     .emerg{box-shadow:none;border:1.5px solid #000}
   }
@@ -492,7 +498,7 @@
   </section>
 
   <details class="sec danger-sec" id="acc-catheter">
-    <summary><span class="t zh-only">大腿根導管(左腿)</span><span class="en">Kateter · kaki kiri</span><span class="freq"><span class="zh-only">最危險</span><span class="en">Paling bahaya</span></span><span class="chev">›</span></summary>
+    <summary><span class="t zh-only">大腿根導管(左腿)</span><span class="en">Kateter · kaki kiri</span><span class="freq"><span class="zh-only">最危險</span><span class="en">Paling bahaya</span></span><span class="chev">⌄</span></summary>
     <div class="body">
       <p class="warnline"><span class="zh">生命線,弄掉會大出血。</span><span class="id">Ini jalur hidup. Kalau lepas → pendarahan hebat.</span></p>
       <ul class="items">
@@ -504,7 +510,7 @@
   </details>
 
   <details class="sec" id="acc-feeding">
-    <summary><span class="t zh-only">餵食</span><span class="en">Memberi Makan</span><span class="freq"><span class="zh-only">最怕嗆到</span><span class="en">Bahaya tersedak</span></span><span class="chev">›</span></summary>
+    <summary><span class="t zh-only">餵食</span><span class="en">Memberi Makan</span><span class="freq"><span class="zh-only">最怕嗆到</span><span class="en">Bahaya tersedak</span></span><span class="chev">⌄</span></summary>
     <div class="body"><ul class="items">
       <li><span class="zh">餐前先叫護理師打針</span><span class="id">Sebelum makan, panggil perawat untuk suntik dulu.</span></li>
       <li><span class="zh">床頭搖到最高,讓阿媽盡量坐直,不要平躺餵</span><span class="id">Naikkan sandaran kepala setinggi mungkin, Oma duduk tegak. Jangan suapi saat berbaring.</span></li>
@@ -518,7 +524,7 @@
   </details>
 
   <details class="sec" id="acc-turning">
-    <summary><span class="t zh-only">翻身</span><span class="en">Ubah Posisi</span><span class="freq"><span class="zh-only">每 2 小時</span><span class="en">Tiap 2 jam</span></span><span class="chev">›</span></summary>
+    <summary><span class="t zh-only">翻身</span><span class="en">Ubah Posisi</span><span class="freq"><span class="zh-only">每 2 小時</span><span class="en">Tiap 2 jam</span></span><span class="chev">⌄</span></summary>
     <div class="body"><ul class="items">
       <li><span class="zh">平躺 → 右側 → 左側 輪流</span><span class="id">Telentang → miring kanan → miring kiri, bergantian.</span></li>
       <li><span class="zh">動作前先跟阿媽說;放輕;先看一眼導管別拉到、別壓到</span><span class="id">Beri tahu Oma dulu; pelan-pelan; lihat kateter, jangan tertarik / tertekan.</span></li>
@@ -529,7 +535,7 @@
   </details>
 
   <details class="sec" id="acc-exercise">
-    <summary><span class="t zh-only">運動 / 防萎縮</span><span class="en">Latihan Gerak</span><span class="freq"><span class="zh-only">每天 2–3 次</span><span class="en">2–3×/hari</span></span><span class="chev">›</span></summary>
+    <summary><span class="t zh-only">運動 / 防萎縮</span><span class="en">Latihan Gerak</span><span class="freq"><span class="zh-only">每天 2–3 次</span><span class="en">2–3×/hari</span></span><span class="chev">⌄</span></summary>
     <div class="body">
       <p class="intro"><span class="zh">臥床肌肉會慢慢流失,目標是「減緩」——保持關節能動、不僵硬。</span><span class="id">Otot mengecil karena berbaring terus. Tujuannya memperlambat — jaga sendi tetap bisa bergerak.</span></p>
       <ul class="items">
@@ -544,7 +550,7 @@
   </details>
 
   <details class="sec" id="acc-oral">
-    <summary><span class="t zh-only">口腔清潔</span><span class="en">Bersihkan Mulut</span><span class="freq"><span class="zh-only">每餐後</span><span class="en">Tiap habis makan</span></span><span class="chev">›</span></summary>
+    <summary><span class="t zh-only">口腔清潔</span><span class="en">Bersihkan Mulut</span><span class="freq"><span class="zh-only">每餐後</span><span class="en">Tiap habis makan</span></span><span class="chev">⌄</span></summary>
     <div class="body"><ul class="items">
       <li><span class="zh">海綿棒沾溫開水(不用牙膏),<b>先在杯緣把水擠掉,再擦嘴巴</b>(太濕會嗆)</span><span class="id">Spons dicelup air hangat matang (tanpa pasta gigi), <b>peras dulu airnya di tepi gelas, baru usap mulut</b> (kalau terlalu basah bisa tersedak).</span></li>
       <li><span class="zh">輕擦:牙齒→牙齦→舌頭→兩頰→上顎,用完就換新的</span><span class="id">Usap lembut: gigi → gusi → lidah → pipi dalam → langit-langit. Sekali pakai langsung ganti yang baru.</span></li>
@@ -554,7 +560,7 @@
   </details>
 
   <details class="sec" id="acc-diaper">
-    <summary><span class="t zh-only">換尿布 / 排便</span><span class="en">Popok / BAB</span><span class="chev">›</span></summary>
+    <summary><span class="t zh-only">換尿布 / 排便</span><span class="en">Popok / BAB</span><span class="chev">⌄</span></summary>
     <div class="body"><ul class="items">
       <li><span class="zh">定時檢查、有髒馬上換,保持乾爽</span><span class="id">Cek berkala, segera ganti kalau kotor, jaga tetap kering.</span></li>
       <li><span class="zh">清潔時小心不要污染導管</span><span class="id">Saat membersihkan, hati-hati jangan sampai mengotori kateter.</span></li>
@@ -565,7 +571,7 @@
   </details>
 
   <details class="sec spo2-c" id="acc-spo2">
-    <summary><span class="t zh-only">血氧</span><span class="en">SpO₂</span><span class="chev">›</span></summary>
+    <summary><span class="t zh-only">血氧</span><span class="en">SpO₂</span><span class="chev">⌄</span></summary>
     <div class="body"><ul class="items">
       <li><span class="zh"><span class="ok">95% 以上正常</span>;91–92 留意;<span class="lo">低於 90% → 叫護理師</span></span><span class="id"><span class="ok">Di atas 95% normal</span>; 91–92 waspada; <span class="lo">di bawah 90% → panggil perawat</span>.</span></li>
       <li class="flag"><span class="zh">數字一直掉又喘 → 馬上叫人</span><span class="id">Kalau angka terus turun &amp; sesak → segera panggil.</span></li>
