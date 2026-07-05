@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>阿媽照顧手冊 · Panduan Perawatan Oma</title>
+<title>照顧手冊 · Panduan Perawatan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -26,7 +26,8 @@
   .mono{font-family:"JetBrains Mono",monospace}
 
   /* ---------- header ---------- */
-  header{position:sticky;top:0;z-index:40;background:var(--bg);padding:16px 20px 0;border-bottom:1px solid var(--line-strong)}
+  header{background:var(--bg);padding:16px 20px 0;border-bottom:1px solid var(--line-strong)}
+  .tabs{position:sticky;top:0;z-index:40;background:var(--bg)}
   .mrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
   h1{font-family:"Noto Sans TC",sans-serif;font-size:24px;font-weight:700;color:var(--navy);line-height:1.12}
   .tunderline{width:46px;height:3px;background:var(--terra);border-radius:2px;margin:9px 0 8px}
@@ -136,6 +137,22 @@
   .sched .tk{font-size:16px}
   .sched .tk .zh{font-weight:400}
 
+  /* home timeline: card table */
+  .tcard{border:1px solid #B9C6D2;border-radius:12px;overflow:hidden;margin-top:16px;background:#fff}
+  .tcard .thead{background:#fff;color:var(--navy);border-bottom:1px solid #B9C6D2;padding:11px 16px 9px;font-family:"Noto Sans TC",sans-serif;font-weight:700;font-size:16px}
+  .tcard .thead .en{font-family:"Hanken Grotesk",sans-serif;font-weight:500;font-size:11.5px;color:var(--navy-2);margin-left:8px}
+  body.lang-id .tcard .thead .en{font-size:15px;color:var(--navy);margin-left:0}
+  .tcard .tact{padding:11px 16px;font-size:15px;border-bottom:1px solid #B9C6D2}
+  .tcard .tact .id{font-size:12.5px}
+  .tcard .tjudge{display:grid;grid-template-columns:1fr 1fr}
+  .tcard .tjudge .ok-c{padding:12px 14px;background:#F0F5F1;border-right:1px solid #B9C6D2}
+  .tcard .tjudge .no-c{padding:12px 14px;background:#FBF0EE}
+  .tcard .tjudge .ok-c .zh{color:var(--safe);font-weight:700}
+  .tcard .tjudge .ok-c .id{color:var(--safe)}
+  .tcard .tjudge .no-c .zh{color:#8E271C;font-weight:700}
+  .tcard .tjudge .no-c .id{color:#A5473A}
+  @media(max-width:420px){.tcard .tjudge{grid-template-columns:1fr}.tcard .tjudge .ok-c{border-right:0;border-bottom:1px solid #B9C6D2}}
+
   /* home timeline: open blocks */
   .tblock{border-top:1px solid var(--line);padding:18px 2px 20px}
   .tblock .tt{font-family:"Noto Sans TC",sans-serif;font-size:17px;font-weight:700;color:var(--navy);margin-bottom:2px}
@@ -171,6 +188,10 @@
   li.flag .zh{color:#8E271C;font-weight:500}
   li.flag .id{color:#A5473A}
 
+  .sec.jump-hl>summary{animation:landhl 1.6s ease-out}
+  @keyframes landhl{0%{background:#FBEFD3}55%{background:#FBEFD3}100%{background:transparent}}
+  .sec{scroll-margin-top:64px}
+
   .sec.danger-sec{border-top:2px solid var(--danger)}
   .sec.danger-sec>summary .t{color:var(--danger)}
   .sec.danger-sec>summary .freq{color:var(--danger)}
@@ -190,6 +211,46 @@
     .rise{opacity:0;transform:translateY(12px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards}
     @keyframes rise{to{opacity:1;transform:none}}
   }
+
+  /* ---------- desktop / wide screens ---------- */
+  /* mobile compact header */
+  @media(max-width:899px){
+    header{padding:10px 16px 0}
+    h1{font-size:18px;display:inline-block}
+    .tunderline{width:30px;height:2px;margin:4px 0 3px}
+    .subtitle{font-size:11px}
+    body.lang-id .subtitle{font-size:16px}
+    .lang summary,.printbtn{min-height:30px;padding:5px 9px;font-size:11.5px}
+    .scene{margin-top:9px;gap:6px}
+    .scene button{min-height:38px;padding:6px 4px;font-size:14px;border-radius:9px}
+    .scene button .en{font-size:9.5px;margin-top:0}
+    body.lang-id .scene button .en{font-size:13px}
+    .tabs{margin-top:10px;padding-top:9px;gap:20px}
+    .tabs button{font-size:15px;padding:0 2px 9px}
+  }
+
+  @media(min-width:900px){
+    body{font-size:17px}
+    header{padding:22px 40px 0}
+    header>.mrow,header>.scene,header>.tabs{max-width:860px;margin-left:auto;margin-right:auto}
+    header .tabs{margin-top:26px}
+    h1{font-size:28px}
+    main{max-width:860px;padding:0 40px}
+    .lead{font-size:15.5px}
+    .hero{padding:30px 34px 32px;border-radius:18px}
+    .hero h2{font-size:22px}
+    ol.key li{padding:15px 0 15px 40px}
+    .emerg{padding:26px 30px 28px}
+    .emerg h2{font-size:23px}
+    .sect{font-size:21px}
+    .tblock{padding:22px 2px 24px}
+    .tblock .tt{font-size:18.5px}
+    .sched .r{grid-template-columns:130px 1fr;padding:15px 10px 15px 6px}
+    .sec>summary{padding:19px 2px 17px}
+    .sec>summary .t{font-size:18px}
+    .gap{height:60px}
+    footer{max-width:860px;padding:24px 40px 30px}
+  }
   @media print{
     body{background:#fff;padding:0;font-size:11.5pt}
     header{position:static}.lang,.tabs,.scene,.printbtn{display:none!important}
@@ -208,9 +269,9 @@
 <header>
   <div class="mrow">
     <div class="titleblock">
-      <h1 class="zh-only">阿媽照顧手冊</h1>
+      <h1 class="zh-only">照顧手冊</h1>
       <div class="tunderline"></div>
-      <div class="subtitle en">Panduan Perawatan Oma</div>
+      <div class="subtitle en">Panduan Perawatan</div>
     </div>
     <div class="hdr-actions">
     <button class="printbtn" id="printBtn" aria-label="列印或存成 PDF / Cetak atau simpan PDF">🖨 列印/PDF</button>
@@ -284,47 +345,35 @@
   <section style="margin-top:28px">
     <div class="sect"><span class="zh-only">血糖檢測時刻表</span><span class="en">Jadwal Cek Gula Darah</span></div>
 
-    <div class="tblock" style="border-top:0">
-      <div class="tt"><span class="zh-only">早上,吃早飯前</span><span class="en">Pagi, sebelum sarapan</span></div>
-      <ol class="steps">
-        <li><span class="zh">吃飯前吃藥</span><span class="id">Minum obat sebelum makan.</span></li>
-        <li><span class="zh">問阿媽要不要吃早餐</span><span class="id">Tanya Oma mau makan pagi atau tidak.</span></li>
-        <li><span class="zh">量血糖:</span><span class="id">Cek gula darah:</span></li>
-      </ol>
-      <div class="rulepair">
-        <div class="ok-r"><span class="zh">70 以上 → 早餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum sarapan.</span></div>
-        <div class="no-r"><span class="zh">70 以下(例如 68、67)→ 不要打針</span><span class="id">Di bawah 70 (misalnya 68, 67) → JANGAN suntik.</span></div>
+    <div class="tcard">
+      <div class="thead"><span class="zh-only">早上,吃早飯前</span><span class="en">Pagi, sebelum sarapan</span></div>
+      <div class="tact"><span class="zh">吃飯前吃藥 → 問阿媽要不要吃早餐 → 量血糖</span><span class="id">Minum obat sebelum makan → tanya Oma mau makan pagi atau tidak → cek gula darah</span></div>
+      <div class="tjudge">
+        <div class="ok-c"><span class="zh">70 以上 → 早餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum sarapan</span></div>
+        <div class="no-c"><span class="zh">70 以下(例如 68、67)→ 不要打針</span><span class="id">Di bawah 70 (misal 68, 67) → JANGAN suntik</span></div>
       </div>
     </div>
 
-    <div class="tblock">
-      <div class="tt"><span class="zh-only">上午 10:00–11:00</span><span class="en">Jam 10:00–11:00 pagi</span></div>
-      <ol class="steps">
-        <li><span class="zh">問阿媽要不要吃午餐</span><span class="id">Tanya Oma mau makan siang atau tidak.</span></li>
-        <li><span class="zh">確定吃 → 看早上量的血糖數字:</span><span class="id">Kalau ya → lihat angka gula darah yang dicek tadi pagi:</span></li>
-      </ol>
-      <div class="rulepair">
-        <div class="ok-r"><span class="zh">70 以上 → 午餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum makan siang.</span></div>
-        <div class="no-r"><span class="zh">70 以下 → 不要打針</span><span class="id">Di bawah 70 → JANGAN suntik.</span></div>
+    <div class="tcard">
+      <div class="thead"><span class="zh-only">上午 10:00–11:00</span><span class="en">Jam 10:00–11:00 pagi</span></div>
+      <div class="tact"><span class="zh">問阿媽要不要吃午餐 → 確定吃,看早上量的血糖數字</span><span class="id">Tanya Oma mau makan siang atau tidak → kalau ya, lihat angka gula darah tadi pagi</span></div>
+      <div class="tjudge">
+        <div class="ok-c"><span class="zh">70 以上 → 午餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum makan siang</span></div>
+        <div class="no-c"><span class="zh">70 以下 → 不要打針</span><span class="id">Di bawah 70 → JANGAN suntik</span></div>
       </div>
     </div>
 
-    <div class="tblock">
-      <div class="tt"><span class="zh-only">下午 3:00(午餐後兩個小時)</span><span class="en">Jam 15:00 / 3 sore (2 jam setelah makan siang)</span></div>
-      <ol class="steps">
-        <li><span class="zh">量血糖,把數字記下來(等一下晚餐要用)</span><span class="id">Cek gula darah, catat angkanya (nanti dipakai untuk makan malam).</span></li>
-      </ol>
+    <div class="tcard">
+      <div class="thead"><span class="zh-only">下午 3:00(午餐後兩個小時)</span><span class="en">Jam 15:00 / 3 sore (2 jam setelah makan siang)</span></div>
+      <div class="tact"><span class="zh">量血糖,把數字記下來(等一下晚餐要用)</span><span class="id">Cek gula darah, catat angkanya (nanti dipakai untuk makan malam)</span></div>
     </div>
 
-    <div class="tblock">
-      <div class="tt"><span class="zh-only">晚餐前</span><span class="en">Sebelum makan malam</span></div>
-      <ol class="steps">
-        <li><span class="zh">問阿媽要不要吃晚餐</span><span class="id">Tanya Oma mau makan malam atau tidak.</span></li>
-        <li><span class="zh">確定吃 → 看下午 3:00 記的血糖數字:</span><span class="id">Kalau ya → lihat angka gula darah yang dicatat jam 3 sore:</span></li>
-      </ol>
-      <div class="rulepair">
-        <div class="ok-r"><span class="zh">70 以上 → 晚餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum makan malam.</span></div>
-        <div class="no-r"><span class="zh">70 以下 → 不要打針</span><span class="id">Di bawah 70 → JANGAN suntik.</span></div>
+    <div class="tcard">
+      <div class="thead"><span class="zh-only">晚餐前</span><span class="en">Sebelum makan malam</span></div>
+      <div class="tact"><span class="zh">問阿媽要不要吃晚餐 → 確定吃,看下午 3:00 記的血糖數字</span><span class="id">Tanya Oma mau makan malam atau tidak → kalau ya, lihat angka gula darah jam 3 sore</span></div>
+      <div class="tjudge">
+        <div class="ok-c"><span class="zh">70 以上 → 晚餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum makan malam</span></div>
+        <div class="no-c"><span class="zh">70 以下 → 不要打針</span><span class="id">Di bawah 70 → JANGAN suntik</span></div>
       </div>
     </div>
   </section>
@@ -584,7 +633,14 @@
   setScene(sv==='hosp'?'hosp':'home',false);
 
   /* hospital schedule row → jump to 步驟說明 and open detail */
-  function goto(id){var el=document.getElementById(id);if(!el)return;setTab('steps');el.setAttribute('open','');setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'})},60);}
+  function goto(id){var el=document.getElementById(id);if(!el)return;setTab('steps');el.setAttribute('open','');
+    el.classList.remove('jump-hl');
+    setTimeout(function(){
+      el.scrollIntoView({behavior:'smooth',block:'start'});
+      void el.offsetWidth;
+      el.classList.add('jump-hl');
+      setTimeout(function(){el.classList.remove('jump-hl')},1700);
+    },120);}
   document.querySelectorAll('[data-goto]').forEach(function(n){n.addEventListener('click',function(){goto(n.getAttribute('data-goto'))});});
 
   /* print / save as PDF */
