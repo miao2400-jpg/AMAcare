@@ -28,14 +28,16 @@
   /* ---------- header ---------- */
   header{position:sticky;top:0;z-index:40;background:var(--bg);padding:16px 20px 0;border-bottom:1px solid var(--line-strong)}
   .mrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--navy-2);font-weight:500;margin-bottom:4px}
-  body.lang-both .eyebrow .en::before{content:"·";margin:0 6px;opacity:.6}
   h1{font-family:"Noto Sans TC",sans-serif;font-size:24px;font-weight:700;color:var(--navy);line-height:1.12}
   .tunderline{width:46px;height:3px;background:var(--terra);border-radius:2px;margin:9px 0 8px}
   .subtitle{font-family:"Hanken Grotesk",sans-serif;font-weight:500;font-size:14px;color:var(--navy-2);letter-spacing:.03em}
   body.lang-id .subtitle{font-family:"Noto Sans TC","Hanken Grotesk",sans-serif;font-size:23px;font-weight:700;color:var(--navy);letter-spacing:0;line-height:1.12}
   body.lang-id .tunderline{margin-top:4px}
 
+  .hdr-actions{display:flex;gap:8px;flex:0 0 auto;align-items:flex-start}
+  .printbtn{border:1px solid var(--line-strong);background:#fff;border-radius:9px;padding:7px 11px;font:inherit;font-size:12.5px;font-weight:500;color:var(--navy-2);cursor:pointer;min-height:34px;white-space:nowrap}
+  .printbtn:hover{border-color:var(--navy-2)}
+  .printbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   .lang{position:relative;flex:0 0 auto}
   .lang summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;color:var(--navy-2);border:1px solid var(--line-strong);border-radius:9px;padding:7px 11px;background:#fff;min-height:34px;white-space:nowrap}
   .lang summary::-webkit-details-marker{display:none}
@@ -45,32 +47,41 @@
   .lang .menu button{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;border:0;background:transparent;font:inherit;font-size:14px;color:var(--ink);padding:11px 14px;cursor:pointer}
   .lang .menu button:hover{background:#F3F0EA}
   .lang .menu button.active{background:#F3F0EA;color:var(--navy);font-weight:600}
-  .lang .menu button .ck{color:var(--terra,#B4471F);opacity:0}
+  .lang .menu button .ck{color:var(--terra);opacity:0}
   .lang .menu button.active .ck{opacity:1;color:var(--accent)}
 
-  /* underline tabs (no boxes) */
-  .tabs{display:flex;gap:26px;margin-top:16px}
-  .tabs button{border:0;background:none;font-family:"Noto Sans TC",sans-serif;font-size:16px;font-weight:700;color:var(--faint);padding:0 2px 12px;cursor:pointer;position:relative}
+  /* ---------- scene switcher (居家/醫院) ---------- */
+  .scene{display:flex;gap:8px;margin-top:14px}
+  .scene button{flex:1;border:1.5px solid var(--line-strong);background:#fff;border-radius:12px;padding:10px 6px;font:inherit;font-family:"Noto Sans TC",sans-serif;font-size:15.5px;font-weight:700;color:var(--faint);cursor:pointer;min-height:48px}
+  .scene button .en{display:block;font-family:"Hanken Grotesk",sans-serif;font-weight:500;font-size:10.5px;letter-spacing:.04em;margin-top:1px;opacity:.75}
+  body.lang-id .scene button .en{font-size:15px;opacity:1;margin-top:0}
+  .scene button.active{background:var(--navy);border-color:var(--navy);color:#fff}
+  .scene button.active .en{opacity:.85}
+  .scene button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* underline tabs */
+  .tabs{display:flex;gap:24px;margin-top:22px;padding-top:14px;border-top:1px solid var(--line)}
+  .tabs button{border:0;background:none;font-family:"Noto Sans TC",sans-serif;font-size:16.5px;font-weight:700;color:#B4AFA8;padding:0 2px 12px;cursor:pointer;position:relative}
   .tabs button .en{font-family:"Hanken Grotesk",sans-serif;font-weight:500;font-size:10px;letter-spacing:.08em;margin-left:5px;opacity:.7}
   body.lang-id .tabs button .en{font-size:15px;margin-left:0;opacity:1}
   .tabs button.active{color:var(--navy)}
-  .tabs button.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--navy)}
+  .tabs button.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--navy);border-radius:2px}
   .tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
   main{max-width:640px;margin:0 auto;padding:0 20px}
   .panel{display:none}
   .panel.show{display:block}
   .gap{height:46px}
-  .gap-s{height:30px}
 
-  /* ---------- open lead ---------- */
   .lead{margin:28px 0 0;font-size:14.5px;color:var(--ink)}
   .lead .id{font-size:13px}
 
-  /* ---------- SOLID protagonist: navy (rounded) ---------- */
+  /* ---------- SOLID navy hero ---------- */
   .hero{background:var(--navy);color:#fff;border-radius:16px;padding:22px 22px 24px}
   .hero .lbl{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--navy-fig);font-weight:500}
   .hero h2{font-family:"Noto Sans TC",sans-serif;font-size:20px;font-weight:700;color:#fff;margin:6px 0 14px}
+  .hero .h-id{font-size:13px;color:var(--navy-fig);margin:-10px 0 14px}
+  body.lang-id .hero .h-id{font-size:19px;color:#fff;font-weight:700;margin:4px 0 14px}
   ol.key{list-style:none;counter-reset:k}
   ol.key li{counter-increment:k;position:relative;padding:13px 0 13px 34px;border-top:1px solid rgba(255,255,255,.12)}
   ol.key li:first-child{border-top:0}
@@ -78,7 +89,7 @@
   ol.key .zh{color:#F2EEE6;font-weight:500}
   ol.key .id{color:#AEBDC9}
 
-  /* ---------- open section (frameless) ---------- */
+  /* ---------- open sections ---------- */
   .sect{font-family:"Noto Sans TC",sans-serif;font-size:19px;font-weight:700;color:var(--navy);margin-bottom:4px}
   .sect .en{display:block;font-family:"Hanken Grotesk",sans-serif;font-size:13px;font-weight:500;color:var(--navy-2);letter-spacing:.03em;margin-top:2px}
   body.lang-id .sect .en{font-size:19px;margin-top:0}
@@ -92,7 +103,7 @@
   .cx-zh,.cx-id{font-size:12.5px;color:var(--faint);margin-top:3px}
   .after{font-size:13.5px;color:var(--sub);margin-top:14px}
 
-  /* ---------- SOLID protagonist: danger (SHARP + heavy shadow) ---------- */
+  /* ---------- SOLID danger (sharp) ---------- */
   .emerg{background:var(--danger);color:#fff;border-radius:3px;padding:20px 22px 22px;box-shadow:0 16px 34px -16px rgba(178,49,37,.62)}
   .emerg .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F3C9C2;font-weight:600}
   .emerg h2{font-family:"Noto Sans TC",sans-serif;font-size:21px;font-weight:700;color:#fff;margin:6px 0 2px}
@@ -100,8 +111,8 @@
   body.lang-id .emerg .h-id{font-size:19px;color:#fff;margin-top:4px}
   .emerg .act{border:1px solid rgba(255,255,255,.34);border-radius:3px;padding:11px 14px;margin-bottom:18px}
   .emerg .act .s{font-weight:700;font-size:15.5px}
-  .emerg .act .w{font-size:12.5px;color:#F3C9C2;margin-top:5px}
-  .emerg .act .w .id{color:#F3C9C2}
+  .emerg .body-txt{font-size:15.5px;font-weight:500}
+  .emerg .body-txt .id{color:#F3C9C2;font-size:14px}
   .sym{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:2px 22px}
   .sym li{padding:9px 0;position:relative;padding-left:15px;border-top:1px solid rgba(255,255,255,.14)}
   .sym li::before{content:"";position:absolute;left:0;top:16px;width:5px;height:5px;border-radius:50%;background:#fff}
@@ -111,7 +122,7 @@
   .emerg .rule .id{color:#F3C9C2;font-weight:500}
   @media(max-width:520px){.sym{grid-template-columns:1fr;gap:0}}
 
-  /* ---------- schedule (frameless) ---------- */
+  /* ---------- schedule ---------- */
   .sechint{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--navy-2);margin:0 0 10px}
   .sechint .arw{font-size:14px;opacity:.8}
   .sched{margin-top:12px}
@@ -124,7 +135,22 @@
   body.lang-id .sched .tm .en{display:block!important;font-family:"Noto Sans TC",sans-serif;font-size:16px;font-weight:700;color:var(--navy);letter-spacing:0;margin-top:0}
   .sched .tk{font-size:16px}
   .sched .tk .zh{font-weight:400}
-  .schednote{margin:16px 0 0;font-size:13px;color:var(--faint)}
+
+  /* home timeline: open blocks */
+  .tblock{border-top:1px solid var(--line);padding:18px 2px 20px}
+  .tblock .tt{font-family:"Noto Sans TC",sans-serif;font-size:17px;font-weight:700;color:var(--navy);margin-bottom:2px}
+  .tblock .tt .en{font-family:"Hanken Grotesk",sans-serif;font-size:12px;font-weight:500;color:var(--navy-2);margin-left:6px}
+  body.lang-id .tblock .tt .en{font-size:16px;color:var(--navy);margin-left:0}
+  .tblock ol.steps{list-style:none;counter-reset:s;margin-top:8px}
+  .tblock ol.steps>li{counter-increment:s;position:relative;padding:8px 0 8px 26px}
+  .tblock ol.steps>li::before{content:counter(s) ".";position:absolute;left:2px;top:8px;font-family:"JetBrains Mono",monospace;font-weight:600;font-size:13.5px;color:var(--terra)}
+  .rulepair{margin-top:6px;padding-left:26px}
+  .rulepair .ok-r,.rulepair .no-r{padding:7px 0;font-weight:500}
+  .rulepair .ok-r .zh{color:var(--safe);font-weight:600}
+  .rulepair .ok-r .id{color:var(--safe)}
+  .rulepair .no-r{border-left:2px solid var(--danger);padding-left:16px}
+  .rulepair .no-r .zh{color:#8E271C;font-weight:700}
+  .rulepair .no-r .id{color:#A5473A}
 
   /* ---------- detail sections (frameless collapsible) ---------- */
   .sec{border-top:1px solid var(--line)}
@@ -145,7 +171,6 @@
   li.flag .zh{color:#8E271C;font-weight:500}
   li.flag .id{color:#A5473A}
 
-  /* danger detail — break consistency */
   .sec.danger-sec{border-top:2px solid var(--danger)}
   .sec.danger-sec>summary .t{color:var(--danger)}
   .sec.danger-sec>summary .freq{color:var(--danger)}
@@ -167,15 +192,18 @@
   }
   @media print{
     body{background:#fff;padding:0;font-size:11.5pt}
-    header{position:static}.lang,.tabs{display:none!important}
-    .panel{display:block!important}.sec>summary .chev{display:none}
+    header{position:static}.lang,.tabs,.scene,.printbtn{display:none!important}
+    .panel{display:none!important}
+    body.scene-home .panel[id^="panel-home"]{display:block!important}
+    body.scene-hosp .panel[id^="panel-hosp"]{display:block!important}
+    .sec>summary .chev{display:none}
     .sec .body,details.sec:not([open]) .body{display:block!important}
     .rise{opacity:1!important;transform:none!important;animation:none!important}
     .emerg{box-shadow:none;border:1.5px solid #000}
   }
 </style>
 </head>
-<body class="lang-both">
+<body class="lang-both scene-home">
 
 <header>
   <div class="mrow">
@@ -184,6 +212,8 @@
       <div class="tunderline"></div>
       <div class="subtitle en">Panduan Perawatan Oma</div>
     </div>
+    <div class="hdr-actions">
+    <button class="printbtn" id="printBtn" aria-label="列印或存成 PDF / Cetak atau simpan PDF">🖨 列印/PDF</button>
     <details class="lang" id="langMenu">
       <summary aria-label="切換語言 / Ganti bahasa">🌐 <span id="langLabel">雙語</span> <span class="caret">▾</span></summary>
       <div class="menu">
@@ -192,180 +222,305 @@
         <button data-lang="id">Bahasa Indonesia <span class="ck">✓</span></button>
       </div>
     </details>
+    </div>
   </div>
+
+  <div class="scene" role="group" aria-label="情境 / Lokasi">
+    <button id="scene-home" class="active">🏠 <span class="zh-only">居家照護</span><span class="en">Perawatan di Rumah</span></button>
+    <button id="scene-hosp">🏥 <span class="zh-only">醫院照護</span><span class="en">Perawatan di RS</span></button>
+  </div>
+
   <div class="tabs" role="tablist">
     <button id="tab-key" class="active" role="tab"><span class="zh-only">重要</span><span class="en">PENTING</span></button>
-    <button id="tab-sched" role="tab"><span class="zh-only">時間表</span><span class="en">JADWAL</span></button>
+    <button id="tab-sched" role="tab"><span class="zh-only" id="schedLabelZh">量血糖時刻表</span><span class="en" id="schedLabelId">JADWAL</span></button>
+    <button id="tab-steps" role="tab"><span class="zh-only" id="stepsLabelZh">打針步驟</span><span class="en" id="stepsLabelId">CARA</span></button>
   </div>
 </header>
 
 <main>
 
-  <!-- ============ PANEL 1 : 重要 ============ -->
-  <div class="panel show" id="panel-key" role="tabpanel">
+<!-- ==================== HOME · 重要 ==================== -->
+<div class="panel show" id="panel-home-key">
 
-    <p class="lead rise">
-      <span class="zh">阿媽:腎衰竭洗腎、住院、大腿根導管(左腿)、完全臥床、意識清楚。所有照顧代勞。</span>
-      <span class="id">Oma: cuci darah, dirawat di RS, kateter di paha (kaki kiri), berbaring total, tapi sadar. Semua dibantu.</span>
+  <p class="lead rise">
+    <span class="zh">阿媽在家休養,定期去洗腎。</span>
+    <span class="id">Oma dirawat di rumah, rutin pergi cuci darah.</span>
+  </p>
+
+  <div class="gap"></div>
+
+  <section class="hero rise" style="animation-delay:.06s">
+    <div class="lbl"><span class="zh-only">總規則</span><span class="en">Aturan Utama</span></div>
+    <h2 class="zh-only">總規則</h2>
+    <div class="h-id en">Aturan Utama</div>
+    <ol class="key">
+      <li><span class="zh">打針、餵藥:照固定規則做。做之前先拍照傳 LINE 留紀錄,傳完就照規則做,不用等回覆</span><span class="id">Suntik &amp; memberi obat: ikuti aturan tetap. Sebelum melakukan, foto dulu dan kirim ke LINE untuk catatan. Setelah kirim, langsung kerjakan sesuai aturan, tidak perlu menunggu balasan.</span></li>
+      <li><span class="zh">每天記錄:送阿媽去洗腎的時間、阿媽今天的狀況(吃飯多寡、尿量、排便、有沒有精神、有沒有去走路…),用簡單中文寫下來+拍照傳 LINE。(寫不出來的,用拍照代替)</span><span class="id">Catatan setiap hari: jam berangkat cuci darah, dan kondisi Oma hari ini (makan banyak atau sedikit, jumlah pipis, BAB, semangat atau tidak, ada jalan atau tidak…). Tulis dengan bahasa Mandarin sederhana + foto, kirim ke LINE. (Kalau tidak bisa menulis, cukup foto saja.)</span></li>
+      <li><span class="zh">其他日常工作(換尿布、擦澡、翻身、餵飯…):直接做,不用特別寫</span><span class="id">Pekerjaan harian lain (ganti popok, lap badan, ubah posisi, menyuapi makan…): langsung kerjakan, tidak perlu ditulis.</span></li>
+    </ol>
+  </section>
+
+  <div class="gap"></div>
+
+  <section class="emerg rise" style="animation-delay:.14s">
+    <div class="lbl"><span class="zh-only">非常重要</span><span class="en">Sangat Penting</span></div>
+    <h2 class="zh-only">不知道狀況、聽不懂的時候</h2>
+    <div class="h-id en">Kalau tidak mengerti situasinya, tidak paham</div>
+    <p class="body-txt" style="margin-bottom:14px">
+      <span class="zh">比方說:看到沒看過的藥、阿媽出現不舒服的狀況</span>
+      <span class="id">Contoh: melihat obat yang belum pernah dilihat, Oma kelihatan tidak enak badan.</span>
     </p>
+    <div class="act">
+      <div class="s"><span class="zh">拍照傳 LINE、用簡單中文描述發生什麼事情 → 那一件事先不要動,等我們回</span><span class="id">Foto dan kirim ke LINE, jelaskan dengan bahasa Mandarin sederhana apa yang terjadi → hal itu jangan dikerjakan dulu, tunggu jawaban kami.</span></div>
+    </div>
+    <div class="rule"><span class="zh">其他事情照常做</span><span class="id">Pekerjaan lain tetap dikerjakan seperti biasa.</span></div>
+  </section>
 
-    <div class="gap"></div>
+</div>
 
-    <section class="hero rise" style="animation-delay:.06s">
-      <div class="lbl"><span class="zh-only">最重要</span><span class="en">Penting</span></div>
-      <h2 class="zh-only">最重要的事</h2>
-      <ol class="key">
-        <li><span class="zh">餵飯前先按鈴叫護理師來打針</span><span class="id">Sebelum makan, tekan bel panggil perawat untuk suntik.</span></li>
-        <li><span class="zh">餵食要坐直、慢慢餵,別嗆到</span><span class="id">Saat memberi makan, posisi duduk tegak, suapi perlahan, jangan sampai tersedak.</span></li>
-        <li><span class="zh">擦嘴時身體也要坐直,海綿棒的水要擠掉,避免嗆到</span><span class="id">Saat bersihkan mulut, badan juga duduk tegak, spons diperas dulu airnya, jangan sampai tersedak.</span></li>
-        <li><span class="zh">導管出血 / 紗布掉 → 馬上叫護理師</span><span class="id">Kalau kateter berdarah / perban lepas → segera panggil perawat.</span></li>
+<!-- ==================== HOME · 時間表 ==================== -->
+<div class="panel" id="panel-home-sched">
+
+  <section style="margin-top:28px">
+    <div class="sect"><span class="zh-only">血糖檢測時刻表</span><span class="en">Jadwal Cek Gula Darah</span></div>
+
+    <div class="tblock" style="border-top:0">
+      <div class="tt"><span class="zh-only">早上,吃早飯前</span><span class="en">Pagi, sebelum sarapan</span></div>
+      <ol class="steps">
+        <li><span class="zh">吃飯前吃藥</span><span class="id">Minum obat sebelum makan.</span></li>
+        <li><span class="zh">問阿媽要不要吃早餐</span><span class="id">Tanya Oma mau makan pagi atau tidak.</span></li>
+        <li><span class="zh">量血糖:</span><span class="id">Cek gula darah:</span></li>
       </ol>
-    </section>
+      <div class="rulepair">
+        <div class="ok-r"><span class="zh">70 以上 → 早餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum sarapan.</span></div>
+        <div class="no-r"><span class="zh">70 以下(例如 68、67)→ 不要打針</span><span class="id">Di bawah 70 (misalnya 68, 67) → JANGAN suntik.</span></div>
+      </div>
+    </div>
 
-    <div class="gap"></div>
+    <div class="tblock">
+      <div class="tt"><span class="zh-only">上午 10:00–11:00</span><span class="en">Jam 10:00–11:00 pagi</span></div>
+      <ol class="steps">
+        <li><span class="zh">問阿媽要不要吃午餐</span><span class="id">Tanya Oma mau makan siang atau tidak.</span></li>
+        <li><span class="zh">確定吃 → 看早上量的血糖數字:</span><span class="id">Kalau ya → lihat angka gula darah yang dicek tadi pagi:</span></li>
+      </ol>
+      <div class="rulepair">
+        <div class="ok-r"><span class="zh">70 以上 → 午餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum makan siang.</span></div>
+        <div class="no-r"><span class="zh">70 以下 → 不要打針</span><span class="id">Di bawah 70 → JANGAN suntik.</span></div>
+      </div>
+    </div>
 
-    <section class="rise" style="animation-delay:.12s">
-      <div class="sect"><span class="zh-only">做事前,先用中文大聲說一聲</span><span class="en">Beri tahu Oma dulu</span></div>
-      <p class="intro">
-        <span class="zh">阿媽聽得懂中文,不要默默動手。靠近、看著她、大聲說:</span>
-        <span class="id">Oma mengerti bahasa Mandarin. Jangan bergerak diam-diam. Dekati, tatap, ucapkan dengan keras:</span>
-      </p>
-      <ul class="phrases">
-        <li><div class="ph">「阿媽,要翻身囉」</div><div class="cx-zh zh-only">要翻身時</div><div class="cx-id id">saat mau membalik badan</div></li>
-        <li><div class="ph">「阿媽,要吃飯囉」</div><div class="cx-zh zh-only">要餵食時</div><div class="cx-id id">saat mau memberi makan</div></li>
-        <li><div class="ph">「阿媽,要換尿布囉」</div><div class="cx-zh zh-only">要換尿布時</div><div class="cx-id id">saat mau ganti popok</div></li>
-        <li><div class="ph">「阿媽,要擦嘴巴囉」</div><div class="cx-zh zh-only">要清潔口腔時</div><div class="cx-id id">saat mau bersihkan mulut</div></li>
+    <div class="tblock">
+      <div class="tt"><span class="zh-only">下午 3:00(午餐後兩個小時)</span><span class="en">Jam 15:00 / 3 sore (2 jam setelah makan siang)</span></div>
+      <ol class="steps">
+        <li><span class="zh">量血糖,把數字記下來(等一下晚餐要用)</span><span class="id">Cek gula darah, catat angkanya (nanti dipakai untuk makan malam).</span></li>
+      </ol>
+    </div>
+
+    <div class="tblock">
+      <div class="tt"><span class="zh-only">晚餐前</span><span class="en">Sebelum makan malam</span></div>
+      <ol class="steps">
+        <li><span class="zh">問阿媽要不要吃晚餐</span><span class="id">Tanya Oma mau makan malam atau tidak.</span></li>
+        <li><span class="zh">確定吃 → 看下午 3:00 記的血糖數字:</span><span class="id">Kalau ya → lihat angka gula darah yang dicatat jam 3 sore:</span></li>
+      </ol>
+      <div class="rulepair">
+        <div class="ok-r"><span class="zh">70 以上 → 晚餐前打 4</span><span class="id">70 ke atas → suntik 4 sebelum makan malam.</span></div>
+        <div class="no-r"><span class="zh">70 以下 → 不要打針</span><span class="id">Di bawah 70 → JANGAN suntik.</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ==================== HOME · 打針步驟 ==================== -->
+<div class="panel" id="panel-home-steps">
+
+  <section style="margin-top:28px">
+    <div class="sect"><span class="zh-only">打針步驟</span><span class="en">Cara Menyuntik</span></div>
+    <p class="intro"><span class="zh">每次都一樣。</span><span class="id">Setiap kali sama.</span></p>
+    <ul class="items">
+      <li class="flag"><span class="zh">打的部位不能有破皮、傷口</span><span class="id">Tempat suntik tidak boleh lecet, tidak boleh ada luka.</span></li>
+      <li class="flag"><span class="zh">雙手、兩腳、肚子輪流換,不能一直打同一個地方</span><span class="id">Ganti-ganti tempat: kedua tangan, kedua kaki, perut, bergantian. Jangan suntik di tempat yang sama terus.</span></li>
+      <li><span class="zh">① 消毒部位</span><span class="id">① Bersihkan (desinfeksi) tempat suntik.</span></li>
+      <li><span class="zh">② 對著光檢查藥水:要透明、沒有顆粒,日期沒過期</span><span class="id">② Periksa cairan di bawah cahaya: harus bening, tidak ada butiran, dan belum kedaluwarsa.</span></li>
+      <li><span class="zh">③ 針頭消毒 → 轉到 <b>1</b> 排空氣 → 轉到 <b>4</b> → 打入後<b>數 10 秒</b></span><span class="id">③ Bersihkan jarum → putar ke angka <b>1</b>, keluarkan udara → putar ke angka <b>4</b> → suntik, lalu <b>tahan hitung 10 detik</b>.</span></li>
+      <li><span class="zh">④ 轉開拔掉針頭,丟棄</span><span class="id">④ Putar, lepas jarum, lalu buang.</span></li>
+    </ul>
+  </section>
+
+</div>
+
+<!-- ==================== HOSPITAL · 重要 ==================== -->
+<div class="panel" id="panel-hosp-key">
+
+  <p class="lead rise">
+    <span class="zh">阿媽:腎衰竭洗腎、住院、大腿根導管(左腿)、完全臥床、意識清楚。所有照顧代勞。</span>
+    <span class="id">Oma: cuci darah, dirawat di RS, kateter di paha (kaki kiri), berbaring total, tapi sadar. Semua dibantu.</span>
+  </p>
+
+  <div class="gap"></div>
+
+  <section class="hero rise" style="animation-delay:.06s">
+    <div class="lbl"><span class="zh-only">最重要</span><span class="en">Penting</span></div>
+    <h2 class="zh-only">最重要的事</h2>
+    <div class="h-id en">Hal Paling Penting</div>
+    <ol class="key">
+      <li><span class="zh">餵飯前先按鈴叫護理師來打針</span><span class="id">Sebelum makan, tekan bel panggil perawat untuk suntik.</span></li>
+      <li><span class="zh">餵食要坐直、慢慢餵,別嗆到</span><span class="id">Saat memberi makan, posisi duduk tegak, suapi perlahan, jangan sampai tersedak.</span></li>
+      <li><span class="zh">擦嘴時身體也要坐直,海綿棒的水要擠掉,避免嗆到</span><span class="id">Saat bersihkan mulut, badan juga duduk tegak, spons diperas dulu airnya, jangan sampai tersedak.</span></li>
+      <li><span class="zh">導管出血 / 紗布掉 → 馬上叫護理師</span><span class="id">Kalau kateter berdarah / perban lepas → segera panggil perawat.</span></li>
+    </ol>
+  </section>
+
+  <div class="gap"></div>
+
+  <section class="rise" style="animation-delay:.12s">
+    <div class="sect"><span class="zh-only">做事前,先用中文大聲說一聲</span><span class="en">Beri tahu Oma dulu</span></div>
+    <p class="intro">
+      <span class="zh">阿媽聽得懂中文,不要默默動手。靠近、看著她、大聲說:</span>
+      <span class="id">Oma mengerti bahasa Mandarin. Jangan bergerak diam-diam. Dekati, tatap, ucapkan dengan keras:</span>
+    </p>
+    <ul class="phrases">
+      <li><div class="ph">「阿媽,要翻身囉」</div><div class="cx-zh zh-only">要翻身時</div><div class="cx-id id">saat mau membalik badan</div></li>
+      <li><div class="ph">「阿媽,要吃飯囉」</div><div class="cx-zh zh-only">要餵食時</div><div class="cx-id id">saat mau memberi makan</div></li>
+      <li><div class="ph">「阿媽,要換尿布囉」</div><div class="cx-zh zh-only">要換尿布時</div><div class="cx-id id">saat mau ganti popok</div></li>
+      <li><div class="ph">「阿媽,要擦嘴巴囉」</div><div class="cx-zh zh-only">要清潔口腔時</div><div class="cx-id id">saat mau bersihkan mulut</div></li>
+    </ul>
+    <p class="after"><span class="zh">說完等一兩秒再動。</span><span class="id" style="color:var(--faint)">Tunggu 1–2 detik, baru mulai.</span></p>
+  </section>
+
+  <div class="gap"></div>
+
+  <section class="emerg rise" style="animation-delay:.18s">
+    <div class="lbl"><span class="zh-only">緊急</span><span class="en">Segera</span></div>
+    <h2 class="zh-only">馬上叫護理師</h2>
+    <div class="h-id en">Segera Panggil Perawat</div>
+    <div class="act">
+      <div class="s"><span class="zh">先按床邊的鈴叫護理師</span><span class="id">Tekan bel di samping tempat tidur.</span></div>
+    </div>
+    <ul class="sym">
+      <li><span class="zh">突然喘、呼吸困難</span><span class="id">Tiba-tiba sesak napas</span></li>
+      <li><span class="zh">血氧太低</span><span class="id">Oksigen (SpO₂) rendah</span></li>
+      <li><span class="zh">嚴重水腫、臉色不對</span><span class="id">Bengkak parah / wajah pucat</span></li>
+      <li><span class="zh">叫不太醒</span><span class="id">Sulit dibangunkan</span></li>
+      <li><span class="zh">導管出血或紗布掉</span><span class="id">Kateter berdarah / perban lepas</span></li>
+      <li><span class="zh">發燒</span><span class="id">Demam</span></li>
+      <li><span class="zh">嗆到一直咳</span><span class="id">Tersedak, batuk terus</span></li>
+      <li><span class="zh">跟剛剛差很多</span><span class="id">Kondisi berubah banyak</span></li>
+    </ul>
+    <div class="rule"><span class="zh">不確定的時候 → 先叫人,不要自己決定</span><span class="id">Kalau ragu → panggil perawat dulu, jangan putuskan sendiri.</span></div>
+  </section>
+
+</div>
+
+<!-- ==================== HOSPITAL · 時間表 ==================== -->
+<div class="panel" id="panel-hosp-sched">
+
+  <section style="margin-top:28px">
+    <div class="sect"><span class="zh-only">每日時間表</span><span class="en">Jadwal Harian</span></div>
+    <div class="sched">
+      <div class="r rlink" data-goto="acc-feeding"><div class="tm"><span class="zh-only">餐前</span><span class="en">Sblm makan</span></div><div class="tk"><span class="zh">按鈴叫護理師打針</span><span class="id">Tekan bel, panggil perawat untuk suntik</span></div></div>
+      <div class="r rlink" data-goto="acc-feeding"><div class="tm"><span class="zh-only">三餐</span><span class="en">3× makan</span></div><div class="tk"><span class="zh">坐直→慢慢餵→坐30分→清潔口腔</span><span class="id">Duduk tegak → suapi → duduk 30 mnt → bersihkan mulut</span></div></div>
+      <div class="r rlink" data-goto="acc-oral"><div class="tm"><span class="zh-only">餐後</span><span class="en">Stlh makan</span></div><div class="tk"><span class="zh">口腔清潔</span><span class="id">Bersihkan mulut</span></div></div>
+      <div class="r rlink" data-goto="acc-turning"><div class="tm"><span class="zh-only">2 小時</span><span class="en">Tiap 2 jam</span></div><div class="tk"><span class="zh">翻身、看皮膚、看導管</span><span class="id">Ubah posisi, cek kulit, cek kateter</span></div></div>
+      <div class="r"><div class="tm"><span class="zh-only">4 小時</span><span class="en">Tiap 4 jam</span></div><div class="tk"><span class="zh">滴眼藥水</span><span class="id">Teteskan obat mata</span></div></div>
+      <div class="r rlink" data-goto="acc-exercise"><div class="tm"><span class="zh-only">2–3 次</span><span class="en">2–3× / hari</span></div><div class="tk"><span class="zh">被動關節運動 / 按摩</span><span class="id">Latihan gerak sendi / pijat</span></div></div>
+      <div class="r rlink" data-goto="acc-diaper"><div class="tm"><span class="zh-only">隨時</span><span class="en">Kapan saja</span></div><div class="tk"><span class="zh">換尿布、記錄大便、保濕、陪講話</span><span class="id">Ganti popok, catat BAB, pelembap, temani bicara</span></div></div>
+      <div class="r"><div class="tm"><span class="zh-only">睡前</span><span class="en">Sblm tidur</span></div><div class="tk"><span class="zh">擦澡、換乾淨衣服</span><span class="id">Lap badan, ganti baju bersih</span></div></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ==================== HOSPITAL · 步驟說明 ==================== -->
+<div class="panel" id="panel-hosp-steps">
+
+  <section style="margin-top:28px;border:0">
+    <div class="sect"><span class="zh-only">步驟說明</span><span class="en">Cara Melakukan</span></div>
+    <div class="sechint" style="margin-top:6px"><span class="arw">↓</span><span class="zh-only">每一列都能點開看做法</span><span class="en">Setiap baris bisa diketuk untuk lihat caranya</span></div>
+  </section>
+
+  <details class="sec danger-sec" id="acc-catheter">
+    <summary><span class="t zh-only">大腿根導管(左腿)</span><span class="en">Kateter · kaki kiri</span><span class="freq"><span class="zh-only">最危險</span><span class="en">Paling bahaya</span></span><span class="chev">›</span></summary>
+    <div class="body">
+      <p class="warnline"><span class="zh">生命線,弄掉會大出血。</span><span class="id">Ini jalur hidup. Kalau lepas → pendarahan hebat.</span></p>
+      <ul class="items">
+        <li class="flag"><span class="zh">不碰、不拉、不弄濕、不換紗布</span><span class="id">Jangan sentuh, jangan tarik, jangan basahi, jangan ganti perban.</span></li>
+        <li class="flag"><span class="zh">那條腿不要大彎、用力</span><span class="id">Kaki itu jangan ditekuk dalam, jangan diberi tekanan.</span></li>
+        <li class="flag"><span class="zh">滲血、滲液、紗布濕或掉、紅腫、喊痛、發燒 → 馬上叫護理師</span><span class="id">Kalau berdarah / basah / perban lepas / merah bengkak / nyeri / demam → segera panggil perawat.</span></li>
       </ul>
-      <p class="after"><span class="zh">說完等一兩秒再動。</span><span class="id" style="color:var(--faint)">Tunggu 1–2 detik, baru mulai.</span></p>
-    </section>
+    </div>
+  </details>
 
-    <div class="gap"></div>
+  <details class="sec" id="acc-feeding">
+    <summary><span class="t zh-only">餵食</span><span class="en">Memberi Makan</span><span class="freq"><span class="zh-only">最怕嗆到</span><span class="en">Bahaya tersedak</span></span><span class="chev">›</span></summary>
+    <div class="body"><ul class="items">
+      <li><span class="zh">餐前先叫護理師打針</span><span class="id">Sebelum makan, panggil perawat untuk suntik dulu.</span></li>
+      <li><span class="zh">床頭搖到最高,讓阿媽盡量坐直,不要平躺餵</span><span class="id">Naikkan sandaran kepala setinggi mungkin, Oma duduk tegak. Jangan suapi saat berbaring.</span></li>
+      <li><span class="zh">慢慢餵,一口吞下去再餵下一口</span><span class="id">Suapi perlahan, tunggu tertelan baru suap lagi.</span></li>
+      <li><span class="zh">吃完坐著至少 30 分鐘才躺</span><span class="id">Setelah makan, duduk minimal 30 menit baru boleh berbaring.</span></li>
+      <li><span class="zh">食量還小 → 先求吃得進、不嗆;之後再控飲食</span><span class="id">Porsi masih sedikit → yang penting mau makan &amp; tidak tersedak dulu.</span></li>
+      <li><span class="zh">飯後如果沒看到要餵的藥,主動問護理師要不要吃藥,不要等</span><span class="id">Setelah makan, kalau tidak ada obat, tanya perawat apakah Oma perlu minum obat, jangan menunggu.</span></li>
+      <li class="flag"><span class="zh">不要餵:楊桃、香蕉、低鈉鹽</span><span class="id">Jangan beri: belimbing, pisang, garam diet (rendah natrium).</span></li>
+      <li class="flag"><span class="zh">嗆咳、臉色變、呼吸怪 → 停,叫護理師</span><span class="id">Kalau tersedak / wajah berubah / napas aneh → berhenti, panggil perawat.</span></li>
+    </ul></div>
+  </details>
 
-    <section class="emerg rise" style="animation-delay:.18s">
-      <div class="lbl"><span class="zh-only">緊急</span><span class="en">Segera</span></div>
-      <h2 class="zh-only">馬上叫護理師</h2>
-      <div class="h-id"><span class="zh-only" style="display:none"></span><span class="en">Segera Panggil Perawat</span></div>
-      <div class="act">
-        <div class="s"><span class="zh">先按床邊的鈴叫護理師</span><span class="id">Tekan bel di samping tempat tidur.</span></div>
-      </div>
-      <ul class="sym">
-        <li><span class="zh">突然喘、呼吸困難</span><span class="id">Tiba-tiba sesak napas</span></li>
-        <li><span class="zh">血氧太低</span><span class="id">Oksigen (SpO₂) rendah</span></li>
-        <li><span class="zh">嚴重水腫、臉色不對</span><span class="id">Bengkak parah / wajah pucat</span></li>
-        <li><span class="zh">叫不太醒</span><span class="id">Sulit dibangunkan</span></li>
-        <li><span class="zh">導管出血或紗布掉</span><span class="id">Kateter berdarah / perban lepas</span></li>
-        <li><span class="zh">發燒</span><span class="id">Demam</span></li>
-        <li><span class="zh">嗆到一直咳</span><span class="id">Tersedak, batuk terus</span></li>
-        <li><span class="zh">跟剛剛差很多</span><span class="id">Kondisi berubah banyak</span></li>
+  <details class="sec" id="acc-turning">
+    <summary><span class="t zh-only">翻身</span><span class="en">Ubah Posisi</span><span class="freq"><span class="zh-only">每 2 小時</span><span class="en">Tiap 2 jam</span></span><span class="chev">›</span></summary>
+    <div class="body"><ul class="items">
+      <li><span class="zh">平躺 → 右側 → 左側 輪流</span><span class="id">Telentang → miring kanan → miring kiri, bergantian.</span></li>
+      <li><span class="zh">動作前先跟阿媽說;放輕;先看一眼導管別拉到、別壓到</span><span class="id">Beri tahu Oma dulu; pelan-pelan; lihat kateter, jangan tertarik / tertekan.</span></li>
+      <li><span class="zh">看骨頭壓到處:尾椎、腳跟、肩胛、手肘、後腦、耳朵</span><span class="id">Cek bagian tulang yang tertekan: tulang ekor, tumit, bahu, siku, belakang kepala, telinga.</span></li>
+      <li class="flag"><span class="zh">發紅退不掉 / 破皮 → 告訴護理師</span><span class="id">Kalau ada kemerahan yang tidak hilang / kulit lecet → beri tahu perawat.</span></li>
+      <li><span class="zh">背後、兩腿間墊枕頭</span><span class="id">Ganjal punggung &amp; antara kedua kaki dengan bantal.</span></li>
+    </ul></div>
+  </details>
+
+  <details class="sec" id="acc-exercise">
+    <summary><span class="t zh-only">運動 / 防萎縮</span><span class="en">Latihan Gerak</span><span class="freq"><span class="zh-only">每天 2–3 次</span><span class="en">2–3×/hari</span></span><span class="chev">›</span></summary>
+    <div class="body">
+      <p class="intro"><span class="zh">臥床肌肉會慢慢流失,目標是「減緩」——保持關節能動、不僵硬。</span><span class="id">Otot mengecil karena berbaring terus. Tujuannya memperlambat — jaga sendi tetap bisa bergerak.</span></p>
+      <ul class="items">
+        <li><span class="zh">幫關節慢慢彎、伸、轉(頸、肩、肘、腕、指;膝、踝、趾),每個動作<b>停 1–2 秒,重複 15 次</b></span><span class="id">Gerakkan sendi leher, tangan &amp; kaki pelan-pelan (tekuk, luruskan, putar): leher, bahu, siku, pergelangan, jari; lutut, pergelangan kaki, jari kaki. Tiap gerakan <b>tahan 1–2 detik, ulang 15 kali</b>.</span></li>
+        <li><span class="zh"><b>請阿媽自己也出一點力</b> — 她有意識,能自己動一點,肌肉退得慢很多(最重要)</span><span class="id"><b>Minta Oma ikut menggerakkan sedikit dengan tenaganya sendiri</b> — ini paling penting untuk otot.</span></li>
+        <li><span class="zh">腳抬高:小腿墊枕頭</span><span class="id">Tinggikan kaki: ganjal betis dengan bantal.</span></li>
+        <li class="flag"><span class="zh">有導管那條腿要特別輕、避開導管、髖部別大彎;先請護理師示範</span><span class="id">Kaki yang ada kateter harus sangat hati-hati, hindari area kateter, jangan tekuk pinggul terlalu dalam. Minta perawat contohkan dulu.</span></li>
+        <li class="flag"><span class="zh">哪條腿紅、腫、熱、硬、痛 → 不要按那條腿,叫護理師(可能血栓)</span><span class="id">Kalau ada kaki yang merah/bengkak/panas/keras/nyeri → JANGAN pijat kaki itu, panggil perawat.</span></li>
       </ul>
-      <div class="rule"><span class="zh">不確定的時候 → 先叫人,不要自己決定</span><span class="id">Kalau ragu → panggil perawat dulu, jangan putuskan sendiri.</span></div>
-    </section>
+      <p class="vidnote">🎬 <a class="vid" href="https://www.youtube.com/watch?v=nyf1m2awwK4" target="_blank" rel="noopener">youtube.com/watch?v=nyf1m2awwK4</a><br>YouTube (Bahasa): <code>latihan ROM pasif pasien</code> · <code>pijat kaki pasien tirah baring</code></p>
+    </div>
+  </details>
 
-  </div>
+  <details class="sec" id="acc-oral">
+    <summary><span class="t zh-only">口腔清潔</span><span class="en">Bersihkan Mulut</span><span class="freq"><span class="zh-only">每餐後</span><span class="en">Tiap habis makan</span></span><span class="chev">›</span></summary>
+    <div class="body"><ul class="items">
+      <li><span class="zh">海綿棒沾溫開水(不用牙膏),<b>先在杯緣把水擠掉,再擦嘴巴</b>(太濕會嗆)</span><span class="id">Spons dicelup air hangat matang (tanpa pasta gigi), <b>peras dulu airnya di tepi gelas, baru usap mulut</b> (kalau terlalu basah bisa tersedak).</span></li>
+      <li><span class="zh">輕擦:牙齒→牙齦→舌頭→兩頰→上顎,用完就換新的</span><span class="id">Usap lembut: gigi → gusi → lidah → pipi dalam → langit-langit. Sekali pakai langsung ganti yang baru.</span></li>
+      <li><span class="zh">上身坐直(跟吃飯一樣);不要灌水進嘴,小心水嗆進氣管(會跑進肺、很危險)</span><span class="id">Badan duduk tegak (sama seperti saat makan). Jangan tuang air ke dalam mulut. Hati-hati air jangan sampai masuk ke saluran napas (bisa masuk paru-paru, berbahaya).</span></li>
+      <li><span class="zh">如果嘴唇乾 → 擦護唇膏/凡士林</span><span class="id">Kalau bibir kering → oleskan pelembap bibir / vaselin.</span></li>
+    </ul></div>
+  </details>
 
-  <!-- ============ PANEL 2 : 時間表 + 細項 ============ -->
-  <div class="panel" id="panel-sched" role="tabpanel">
+  <details class="sec" id="acc-diaper">
+    <summary><span class="t zh-only">換尿布 / 排便</span><span class="en">Popok / BAB</span><span class="chev">›</span></summary>
+    <div class="body"><ul class="items">
+      <li><span class="zh">定時檢查、有髒馬上換,保持乾爽</span><span class="id">Cek berkala, segera ganti kalau kotor, jaga tetap kering.</span></li>
+      <li><span class="zh">清潔時小心不要污染導管</span><span class="id">Saat membersihkan, hati-hati jangan sampai mengotori kateter.</span></li>
+      <li><span class="zh"><b>每天記錄有沒有大便</b></span><span class="id"><b>Catat setiap hari apakah Oma BAB.</b></span></li>
+      <li><span class="zh">有大便馬上清潔更換</span><span class="id">Kalau BAB, segera bersihkan dan ganti.</span></li>
+      <li class="flag"><span class="zh">2–3 天沒大便 / 肚子鼓硬 / 想吐 → 告訴護理師</span><span class="id">2–3 hari tidak BAB / perut kembung keras / mual → beri tahu perawat.</span></li>
+    </ul></div>
+  </details>
 
-    <section style="margin-top:28px">
-      <div class="sect"><span class="zh-only">每日時間表</span><span class="en">Jadwal Harian</span></div>
-      <div class="sched">
-        <div class="r rlink" data-goto="acc-feeding"><div class="tm"><span class="zh-only">餐前</span><span class="en">Sblm makan</span></div><div class="tk"><span class="zh">按鈴叫護理師打針</span><span class="id">Tekan bel, panggil perawat untuk suntik</span></div></div>
-        <div class="r rlink" data-goto="acc-feeding"><div class="tm"><span class="zh-only">三餐</span><span class="en">3× makan</span></div><div class="tk"><span class="zh">坐直→慢慢餵→坐30分→清潔口腔</span><span class="id">Duduk tegak → suapi → duduk 30 mnt → bersihkan mulut</span></div></div>
-        <div class="r rlink" data-goto="acc-oral"><div class="tm"><span class="zh-only">餐後</span><span class="en">Stlh makan</span></div><div class="tk"><span class="zh">口腔清潔</span><span class="id">Bersihkan mulut</span></div></div>
-        <div class="r rlink" data-goto="acc-turning"><div class="tm"><span class="zh-only">2 小時</span><span class="en">Tiap 2 jam</span></div><div class="tk"><span class="zh">翻身、看皮膚、看導管</span><span class="id">Ubah posisi, cek kulit, cek kateter</span></div></div>
-        <div class="r"><div class="tm"><span class="zh-only">4 小時</span><span class="en">Tiap 4 jam</span></div><div class="tk"><span class="zh">滴眼藥水</span><span class="id">Teteskan obat mata</span></div></div>
-        <div class="r rlink" data-goto="acc-exercise"><div class="tm"><span class="zh-only">2–3 次</span><span class="en">2–3× / hari</span></div><div class="tk"><span class="zh">被動關節運動 / 按摩</span><span class="id">Latihan gerak sendi / pijat</span></div></div>
-        <div class="r rlink" data-goto="acc-diaper"><div class="tm"><span class="zh-only">隨時</span><span class="en">Kapan saja</span></div><div class="tk"><span class="zh">換尿布、記錄大便、保濕、陪講話</span><span class="id">Ganti popok, catat BAB, pelembap, temani bicara</span></div></div>
-        <div class="r"><div class="tm"><span class="zh-only">睡前</span><span class="en">Sblm tidur</span></div><div class="tk"><span class="zh">擦澡、換乾淨衣服</span><span class="id">Lap badan, ganti baju bersih</span></div></div>
-      </div>
-    </section>
+  <details class="sec spo2-c" id="acc-spo2">
+    <summary><span class="t zh-only">血氧</span><span class="en">SpO₂</span><span class="chev">›</span></summary>
+    <div class="body"><ul class="items">
+      <li><span class="zh"><span class="ok">95% 以上正常</span>;91–92 留意;<span class="lo">低於 90% → 叫護理師</span></span><span class="id"><span class="ok">Di atas 95% normal</span>; 91–92 waspada; <span class="lo">di bawah 90% → panggil perawat</span>.</span></li>
+      <li class="flag"><span class="zh">數字一直掉又喘 → 馬上叫人</span><span class="id">Kalau angka terus turun &amp; sesak → segera panggil.</span></li>
+    </ul></div>
+  </details>
 
-    <div class="gap"></div>
-
-    <div class="sechint"><span class="arw">↓</span><span class="zh-only">每一列都能點開看做法</span><span class="en">Setiap baris bisa diketuk untuk lihat caranya</span></div>
-
-    <details class="sec danger-sec" id="acc-catheter">
-      <summary><span class="t zh-only">大腿根導管(左腿)</span><span class="en">Kateter · kaki kiri</span><span class="freq"><span class="zh-only">最危險</span><span class="en">Paling bahaya</span></span><span class="chev">›</span></summary>
-      <div class="body">
-        <p class="warnline"><span class="zh">生命線,弄掉會大出血。</span><span class="id">Ini jalur hidup. Kalau lepas → pendarahan hebat.</span></p>
-        <ul class="items">
-          <li class="flag"><span class="zh">不碰、不拉、不弄濕、不換紗布</span><span class="id">Jangan sentuh, jangan tarik, jangan basahi, jangan ganti perban.</span></li>
-          <li class="flag"><span class="zh">那條腿不要大彎、用力</span><span class="id">Kaki itu jangan ditekuk dalam, jangan diberi tekanan.</span></li>
-          <li class="flag"><span class="zh">滲血、滲液、紗布濕或掉、紅腫、喊痛、發燒 → 馬上叫護理師</span><span class="id">Kalau berdarah / basah / perban lepas / merah bengkak / nyeri / demam → segera panggil perawat.</span></li>
-        </ul>
-      </div>
-    </details>
-
-    <details class="sec" id="acc-feeding">
-      <summary><span class="t zh-only">餵食</span><span class="en">Memberi Makan</span><span class="freq"><span class="zh-only">最怕嗆到</span><span class="en">Bahaya tersedak</span></span><span class="chev">›</span></summary>
-      <div class="body"><ul class="items">
-        <li><span class="zh">餐前先叫護理師打針</span><span class="id">Sebelum makan, panggil perawat untuk suntik dulu.</span></li>
-        <li><span class="zh">床頭搖到最高,讓阿媽盡量坐直,不要平躺餵</span><span class="id">Naikkan sandaran kepala setinggi mungkin, Oma duduk tegak. Jangan suapi saat berbaring.</span></li>
-        <li><span class="zh">慢慢餵,一口吞下去再餵下一口</span><span class="id">Suapi perlahan, tunggu tertelan baru suap lagi.</span></li>
-        <li><span class="zh">吃完坐著至少 30 分鐘才躺</span><span class="id">Setelah makan, duduk minimal 30 menit baru boleh berbaring.</span></li>
-        <li><span class="zh">食量還小 → 先求吃得進、不嗆;之後再控飲食</span><span class="id">Porsi masih sedikit → yang penting mau makan &amp; tidak tersedak dulu.</span></li>
-        <li><span class="zh">飯後如果沒看到要餵的藥,主動問護理師要不要吃藥,不要等</span><span class="id">Setelah makan, kalau tidak ada obat, tanya perawat apakah Oma perlu minum obat, jangan menunggu.</span></li>
-        <li class="flag"><span class="zh">不要餵:楊桃、香蕉、低鈉鹽</span><span class="id">Jangan beri: belimbing, pisang, garam diet (rendah natrium).</span></li>
-        <li class="flag"><span class="zh">嗆咳、臉色變、呼吸怪 → 停,叫護理師</span><span class="id">Kalau tersedak / wajah berubah / napas aneh → berhenti, panggil perawat.</span></li>
-      </ul></div>
-    </details>
-
-    <details class="sec" id="acc-turning">
-      <summary><span class="t zh-only">翻身</span><span class="en">Ubah Posisi</span><span class="freq"><span class="zh-only">每 2 小時</span><span class="en">Tiap 2 jam</span></span><span class="chev">›</span></summary>
-      <div class="body"><ul class="items">
-        <li><span class="zh">平躺 → 右側 → 左側 輪流</span><span class="id">Telentang → miring kanan → miring kiri, bergantian.</span></li>
-        <li><span class="zh">動作前先跟阿媽說;放輕;先看一眼導管別拉到、別壓到</span><span class="id">Beri tahu Oma dulu; pelan-pelan; lihat kateter, jangan tertarik / tertekan.</span></li>
-        <li><span class="zh">看骨頭壓到處:尾椎、腳跟、肩胛、手肘、後腦、耳朵</span><span class="id">Cek bagian tulang yang tertekan: tulang ekor, tumit, bahu, siku, belakang kepala, telinga.</span></li>
-        <li class="flag"><span class="zh">發紅退不掉 / 破皮 → 告訴護理師</span><span class="id">Kalau ada kemerahan yang tidak hilang / kulit lecet → beri tahu perawat.</span></li>
-        <li><span class="zh">背後、兩腿間墊枕頭</span><span class="id">Ganjal punggung &amp; antara kedua kaki dengan bantal.</span></li>
-      </ul></div>
-    </details>
-
-    <details class="sec" id="acc-exercise">
-      <summary><span class="t zh-only">運動 / 防萎縮</span><span class="en">Latihan Gerak</span><span class="freq"><span class="zh-only">每天 2–3 次</span><span class="en">2–3×/hari</span></span><span class="chev">›</span></summary>
-      <div class="body">
-        <p class="intro"><span class="zh">臥床肌肉會慢慢流失,目標是「減緩」——保持關節能動、不僵硬。</span><span class="id">Otot mengecil karena berbaring terus. Tujuannya memperlambat — jaga sendi tetap bisa bergerak.</span></p>
-        <ul class="items">
-          <li><span class="zh">幫關節慢慢彎、伸、轉(頸、肩、肘、腕、指;膝、踝、趾),每個動作<b>停 1–2 秒,重複 15 次</b></span><span class="id">Gerakkan sendi leher, tangan &amp; kaki pelan-pelan (tekuk, luruskan, putar): leher, bahu, siku, pergelangan, jari; lutut, pergelangan kaki, jari kaki. Tiap gerakan <b>tahan 1–2 detik, ulang 15 kali</b>.</span></li>
-          <li><span class="zh"><b>請阿媽自己也出一點力</b> — 她有意識,能自己動一點,肌肉退得慢很多(最重要)</span><span class="id"><b>Minta Oma ikut menggerakkan sedikit dengan tenaganya sendiri</b> — ini paling penting untuk otot.</span></li>
-          <li><span class="zh">腳抬高:小腿墊枕頭</span><span class="id">Tinggikan kaki: ganjal betis dengan bantal.</span></li>
-          <li class="flag"><span class="zh">有導管那條腿要特別輕、避開導管、髖部別大彎;先請護理師示範</span><span class="id">Kaki yang ada kateter harus sangat hati-hati, hindari area kateter, jangan tekuk pinggul terlalu dalam. Minta perawat contohkan dulu.</span></li>
-          <li class="flag"><span class="zh">哪條腿紅、腫、熱、硬、痛 → 不要按那條腿,叫護理師(可能血栓)</span><span class="id">Kalau ada kaki yang merah/bengkak/panas/keras/nyeri → JANGAN pijat kaki itu, panggil perawat.</span></li>
-        </ul>
-        <p class="vidnote">🎬 <a class="vid" href="https://www.youtube.com/watch?v=nyf1m2awwK4" target="_blank" rel="noopener">youtube.com/watch?v=nyf1m2awwK4</a><br>YouTube (Bahasa): <code>latihan ROM pasif pasien</code> · <code>pijat kaki pasien tirah baring</code></p>
-      </div>
-    </details>
-
-    <details class="sec" id="acc-oral">
-      <summary><span class="t zh-only">口腔清潔</span><span class="en">Bersihkan Mulut</span><span class="freq"><span class="zh-only">每餐後</span><span class="en">Tiap habis makan</span></span><span class="chev">›</span></summary>
-      <div class="body"><ul class="items">
-        <li><span class="zh">海綿棒沾溫開水(不用牙膏),<b>先在杯緣把水擠掉,再擦嘴巴</b>(太濕會嗆)</span><span class="id">Spons dicelup air hangat matang (tanpa pasta gigi), <b>peras dulu airnya di tepi gelas, baru usap mulut</b> (kalau terlalu basah bisa tersedak).</span></li>
-        <li><span class="zh">輕擦:牙齒→牙齦→舌頭→兩頰→上顎,用完就換新的</span><span class="id">Usap lembut: gigi → gusi → lidah → pipi dalam → langit-langit. Sekali pakai langsung ganti yang baru.</span></li>
-        <li><span class="zh">上身坐直(跟吃飯一樣);不要灌水進嘴,小心水嗆進氣管(會跑進肺、很危險)</span><span class="id">Badan duduk tegak (sama seperti saat makan). Jangan tuang air ke dalam mulut. Hati-hati air jangan sampai masuk ke saluran napas (bisa masuk paru-paru, berbahaya).</span></li>
-        <li><span class="zh">如果嘴唇乾 → 擦護唇膏/凡士林</span><span class="id">Kalau bibir kering → oleskan pelembap bibir / vaselin.</span></li>
-      </ul></div>
-    </details>
-
-    <details class="sec" id="acc-diaper">
-      <summary><span class="t zh-only">換尿布 / 排便</span><span class="en">Popok / BAB</span><span class="chev">›</span></summary>
-      <div class="body"><ul class="items">
-        <li><span class="zh">定時檢查、有髒馬上換,保持乾爽</span><span class="id">Cek berkala, segera ganti kalau kotor, jaga tetap kering.</span></li>
-        <li><span class="zh">清潔時小心不要污染導管</span><span class="id">Saat membersihkan, hati-hati jangan sampai mengotori kateter.</span></li>
-        <li><span class="zh"><b>每天記錄有沒有大便</b></span><span class="id"><b>Catat setiap hari apakah Oma BAB.</b></span></li>
-        <li><span class="zh">有大便馬上清潔更換</span><span class="id">Kalau BAB, segera bersihkan dan ganti.</span></li>
-        <li class="flag"><span class="zh">2–3 天沒大便 / 肚子鼓硬 / 想吐 → 告訴護理師</span><span class="id">2–3 hari tidak BAB / perut kembung keras / mual → beri tahu perawat.</span></li>
-      </ul></div>
-    </details>
-
-    <details class="sec spo2-c" id="acc-spo2">
-      <summary><span class="t zh-only">血氧</span><span class="en">SpO₂</span><span class="chev">›</span></summary>
-      <div class="body"><ul class="items">
-        <li><span class="zh"><span class="ok">95% 以上正常</span>;91–92 留意;<span class="lo">低於 90% → 叫護理師</span></span><span class="id"><span class="ok">Di atas 95% normal</span>; 91–92 waspada; <span class="lo">di bawah 90% → panggil perawat</span>.</span></li>
-        <li class="flag"><span class="zh">數字一直掉又喘 → 馬上叫人</span><span class="id">Kalau angka terus turun &amp; sesak → segera panggil.</span></li>
-      </ul></div>
-    </details>
-
-  </div>
+</div>
 
 </main>
 
@@ -374,6 +529,7 @@
 <script>
 (function(){
   var body=document.body;
+  /* language */
   var lbtns=document.querySelectorAll('.lang .menu button'),
       label=document.getElementById('langLabel'),
       menu=document.getElementById('langMenu'),
@@ -392,13 +548,47 @@
   document.addEventListener('click',function(e){if(menu.hasAttribute('open')&&!menu.contains(e.target))menu.removeAttribute('open');});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')menu.removeAttribute('open');});
 
-  var tabs={key:document.getElementById('tab-key'),sched:document.getElementById('tab-sched')},
-      panels={key:document.getElementById('panel-key'),sched:document.getElementById('panel-sched')};
-  function show(k){Object.keys(tabs).forEach(function(x){var on=x===k;tabs[x].classList.toggle('active',on);panels[x].classList.toggle('show',on);});}
-  tabs.key.addEventListener('click',function(){show('key')});
-  tabs.sched.addEventListener('click',function(){show('sched')});
-  function goto(id){var el=document.getElementById(id);if(!el)return;show('sched');el.setAttribute('open','');setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'})},60);}
+  /* scene + tabs */
+  var scene='home',tab='key';
+  var sBtns={home:document.getElementById('scene-home'),hosp:document.getElementById('scene-hosp')};
+  var tBtns={key:document.getElementById('tab-key'),sched:document.getElementById('tab-sched'),steps:document.getElementById('tab-steps')};
+  var panels={
+    'home-key':document.getElementById('panel-home-key'),
+    'home-sched':document.getElementById('panel-home-sched'),
+    'home-steps':document.getElementById('panel-home-steps'),
+    'hosp-key':document.getElementById('panel-hosp-key'),
+    'hosp-sched':document.getElementById('panel-hosp-sched'),
+    'hosp-steps':document.getElementById('panel-hosp-steps')
+  };
+  var labels={
+    home:{schedZh:'量血糖時刻表',schedId:'JADWAL GULA',stepsZh:'打針步驟',stepsId:'CARA SUNTIK'},
+    hosp:{schedZh:'時間表',schedId:'JADWAL',stepsZh:'步驟說明',stepsId:'CARA'}
+  };
+  function render(){
+    Object.keys(sBtns).forEach(function(s){sBtns[s].classList.toggle('active',s===scene)});
+    Object.keys(tBtns).forEach(function(t){tBtns[t].classList.toggle('active',t===tab)});
+    Object.keys(panels).forEach(function(p){panels[p].classList.toggle('show',p===scene+'-'+tab)});
+    document.getElementById('schedLabelZh').textContent=labels[scene].schedZh;
+    document.getElementById('schedLabelId').textContent=labels[scene].schedId;
+    document.getElementById('stepsLabelZh').textContent=labels[scene].stepsZh;
+    document.getElementById('stepsLabelId').textContent=labels[scene].stepsId;
+  }
+  function setScene(s,save){scene=s;tab='key';body.classList.remove('scene-home','scene-hosp');body.classList.add('scene-'+s);render();if(save){try{localStorage.setItem('careScene',s)}catch(e){}}}
+  function setTab(t){tab=t;render();}
+  sBtns.home.addEventListener('click',function(){setScene('home',true)});
+  sBtns.hosp.addEventListener('click',function(){setScene('hosp',true)});
+  tBtns.key.addEventListener('click',function(){setTab('key')});
+  tBtns.sched.addEventListener('click',function(){setTab('sched')});
+  tBtns.steps.addEventListener('click',function(){setTab('steps')});
+  var sv=null;try{sv=localStorage.getItem('careScene')}catch(e){}
+  setScene(sv==='hosp'?'hosp':'home',false);
+
+  /* hospital schedule row → jump to 步驟說明 and open detail */
+  function goto(id){var el=document.getElementById(id);if(!el)return;setTab('steps');el.setAttribute('open','');setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'})},60);}
   document.querySelectorAll('[data-goto]').forEach(function(n){n.addEventListener('click',function(){goto(n.getAttribute('data-goto'))});});
+
+  /* print / save as PDF */
+  document.getElementById('printBtn').addEventListener('click',function(){window.print();});
 })();
 </script>
 </body>
