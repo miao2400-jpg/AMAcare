@@ -40,9 +40,8 @@ on:
         required: false
         default: "form4"
       key:
-        description: "Secret used to seal resolved form URLs in the log (optional)"
-        required: false
-        default: ""
+        description: "Secret used to seal the whole output in the log (required)"
+        required: true
 
 permissions:
   contents: read

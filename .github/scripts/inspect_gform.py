@@ -142,8 +142,11 @@ def main():
         except Exception as e:
             rec["error"] = f"{type(e).__name__}: {e}"
         results[label] = rec
-    print("=== GFORM_INSPECT_BEGIN ===")
-    print(json.dumps(results, ensure_ascii=False, indent=2))
+    if not key:
+        print("GFORM_SEAL_KEY is required; refusing to print form structure in clear", file=sys.stderr)
+        return 1
+    print("=== GFORM_INSPECT_BEGIN (sealed) ===")
+    print(seal(json.dumps(results, ensure_ascii=False), key))
     print("=== GFORM_INSPECT_END ===")
     return 0
 
