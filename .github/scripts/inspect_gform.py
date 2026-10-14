@@ -5,6 +5,8 @@ Reads form URLs from environment variables GFORM_URL_1..GFORM_URL_9, fetches eac
 viewform page anonymously, parses the embedded FB_PUBLIC_LOAD_DATA_ array and prints
 the question titles, types, entry ids and options. Form ids and URLs are never printed.
 """
+import base64
+import hashlib
 import json
 import os
 import re
@@ -36,6 +38,24 @@ def classify_final_url(final_url: str) -> str:
     if "viewform" in final_url:
         return "OPEN_VIEWFORM"
     return "OTHER"
+
+
+def seal(text: str, key: str) -> str:
+    """Obfuscate text with a keyed keystream so the log never shows it in clear.
+
+    Only the holder of the (masked) key input can read it back. Not meant as
+    strong cryptography; it keeps form ids out of a public log.
+    """
+    if not key:
+        return "(no key given)"
+    data = text.encode("utf-8")
+    stream = b""
+    counter = 0
+    while len(stream) < len(data):
+        stream += hashlib.sha256(f"{key}:{counter}".encode("utf-8")).digest()
+        counter += 1
+    out = bytes(a ^ b for a, b in zip(data, stream))
+    return base64.urlsafe_b64encode(out).decode("ascii")
 
 
 def extract_load_data(html: str):
@@ -92,6 +112,7 @@ def describe(data):
 
 def main():
     results = {}
+    key = os.environ.get("GFORM_SEAL_KEY", "")
     for i in range(1, 10):
         url = os.environ.get(f"GFORM_URL_{i}", "").strip()
         label = os.environ.get(f"GFORM_LABEL_{i}", f"form{i}").strip() or f"form{i}"
@@ -103,6 +124,7 @@ def main():
             rec["http_status"] = status
             rec["final_url_kind"] = classify_final_url(final_url)
             rec["final_path_is_viewform"] = final_url.rstrip("/").split("?")[0].endswith("viewform")
+            rec["final_url_sealed"] = seal(final_url.split("?")[0], key)
             rec["has_fbzx_input"] = bool(re.search(r'name="fbzx"', html))
             rec["has_pageHistory_input"] = bool(re.search(r'name="pageHistory"', html))
             rec["has_emailAddress_input"] = bool(re.search(r'name="emailAddress"', html))
@@ -116,11 +138,15 @@ def main():
                 rec["form"] = describe(data)
         except urllib.error.HTTPError as e:
             rec["error"] = f"HTTPError {e.code}"
+            rec["error_url_sealed"] = seal((e.geturl() or "").split("?")[0], key)
         except Exception as e:
             rec["error"] = f"{type(e).__name__}: {e}"
         results[label] = rec
-    print("=== GFORM_INSPECT_BEGIN ===")
-    print(json.dumps(results, ensure_ascii=False, indent=2))
+    if not key:
+        print("GFORM_SEAL_KEY is required; refusing to print form structure in clear", file=sys.stderr)
+        return 1
+    print("=== GFORM_INSPECT_BEGIN (sealed) ===")
+    print(seal(json.dumps(results, ensure_ascii=False), key))
     print("=== GFORM_INSPECT_END ===")
     return 0
 
