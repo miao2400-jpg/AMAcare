@@ -223,7 +223,7 @@
   </div>
   <div class="card">
     <button class="btn danger block" id="btn-clear">清除這支手機上的所有資料</button>
-    <p class="small muted" style="margin-top:8px">版本 1.2 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
+    <p class="small muted" style="margin-top:8px">版本 1.3 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
   </div>
 </section>
 </main>
@@ -465,6 +465,7 @@ function renderApply(){
     box.appendChild(field('ap-date','請假日期','date',todayISO()));
     var r=el('div',{class:'row'}); r.appendChild(field('ap-start','起始時間','time',ws)); r.appendChild(field('ap-end','結束時間','time',we)); box.appendChild(r);
     box.appendChild(field('ap-reason','請假事由','text','',{placeholder:'例如：家裡有事要處理'}));
+    box.appendChild(field('ap-handover','工作交接（選填）','text','',{placeholder:'例如：已交接給同事○○'}));
     $('ap-type').addEventListener('change',function(){ $('ap-type-other-wrap').hidden=(this.value!=='__other__'); });
     note.textContent='請假要事先提出。寄信、填表單都做完，HR 才會處理。';
   } else if(kind==='overtime'){
@@ -480,9 +481,9 @@ function renderApply(){
     var r3=el('div',{class:'row'}); r3.appendChild(field('ap-date','出發日','date',todayISO())); r3.appendChild(field('ap-end-date','結束日','date',todayISO())); box.appendChild(r3);
     var r4=el('div',{class:'row'}); r4.appendChild(field('ap-start','起始時間','time',ws)); r4.appendChild(field('ap-end','結束時間','time',we)); box.appendChild(r4);
     var cks=el('div',{class:'row'});
-    var c1=el('input',{type:'checkbox',id:'ap-allday'}); c1.checked=true; cks.appendChild(el('label',{class:'chk'},[c1,'一整天']));
-    var c2=el('input',{type:'checkbox',id:'ap-nooffice'}); c2.checked=true; cks.appendChild(el('label',{class:'chk'},[c2,'當天不進辦公室']));
+    var c2=el('input',{type:'checkbox',id:'ap-nooffice'}); c2.checked=true; cks.appendChild(el('label',{class:'chk'},[c2,'不進辦公室']));
     box.appendChild(cks);
+    box.appendChild(field('ap-transport','交通方式（選填）','text','',{placeholder:'例如：捷運、高鐵、自行開車'}));
     note.textContent='差旅表單需要登入公司 Google 帳號，所以不能預填，開啟後請自己填。出差期間每天還是要打卡，地點選「其他」填地點。';
   }
 }
@@ -492,7 +493,8 @@ function applyData(){
   d.start=$('ap-start').value; d.end=$('ap-end').value;
   if(kind==='leave'){ d.type=$('ap-type').value; d.typeOther=($('ap-type-other')?$('ap-type-other').value:'').trim(); d.typeLabel=(d.type==='__other__'?d.typeOther:d.type); }
   if(kind==='overtime'){ d.comp=$('ap-comp').value; d.compLabel=d.comp.split('(')[0]; var span=toMin(d.end)-toMin(d.start); d.nextDay=span<0; if(span<0) span+=1440; d.hours=Math.round(span/60*10)/10; }
-  if(kind==='travel'){ d.dest=($('ap-dest').value||'').trim(); d.endDate=$('ap-end-date').value||d.date; d.allDay=$('ap-allday').checked; d.noOffice=$('ap-nooffice').checked; }
+  if(kind==='travel'){ d.dest=($('ap-dest').value||'').trim(); d.endDate=$('ap-end-date').value||d.date; d.noOffice=$('ap-nooffice').checked; d.transport=($('ap-transport').value||'').trim(); }
+  if(kind==='leave'){ d.handover=($('ap-handover').value||'').trim(); d.hours=leaveHours(d.start,d.end); }
   return d;
 }
 function validate(d){
@@ -510,26 +512,33 @@ function summary(d){
   if(d.kind==='overtime') return fmtMD(d.date)+' 加班 '+d.start+'–'+(d.nextDay?'翌日':'')+d.end;
   return (d.endDate&&d.endDate!==d.date?fmtMD(d.date)+'–'+fmtMD(d.endDate):fmtMD(d.date))+' 出差 '+d.dest;
 }
+function fmtDWk(iso){ var p=iso.split('-'); return (+p[1])+'/'+(+p[2])+'（週'+WD[parseISO(iso).getDay()]+'）'; }
+function leaveHours(a,b){ var s=toMin(a), e=toMin(b), m=e-s; var ov=Math.max(0,Math.min(e,780)-Math.max(s,720)); m-=ov; return m>0?Math.round(m/60*10)/10:0; }
 function mailFor(d){
   var c=cfg||{}, sig=c.name||'', full=c.fullName||c.name||'', sup=(c.supervisor&&c.supervisor.title)||'', hr=(c.hr&&c.hr.name)||'';
-  var ask='再麻煩'+(sup||'您')+'協助確認並轉寄給'+(hr||'人資')+'覆核，謝謝！';
-  var subject, lines=[(sup||'主管')+'好：',''];
+  var label={leave:'請假',overtime:'加班',travel:'差旅'}[d.kind];
+  var subject='['+label+'申請] '+full+' '+fmtDot(d.date);
+  var lines=[(sup||'主管')+'好：','','以下為'+label+'申請，再麻煩協助確認並轉寄給'+(hr||'人資')+'覆核，謝謝！',''];
   if(d.kind==='leave'){
-    subject='[請假申請] '+full+' '+fmtDot(d.date);
-    lines.push('因'+d.reason+'，');
-    lines.push(fmtDW(d.date)+' '+hhmm(d.start)+'-'+hhmm(d.end)+' 需請'+d.typeLabel+'，');
+    lines.push('・假別：'+d.typeLabel);
+    lines.push('・日期：'+fmtDWk(d.date));
+    lines.push('・時間：'+d.start+' – '+d.end+'（共'+d.hours+'小時）');
+    lines.push('・事由：'+d.reason);
+    if(d.handover) lines.push('・工作交接：'+d.handover);
   } else if(d.kind==='overtime'){
-    subject='[加班申請] '+full+' '+fmtDot(d.date);
-    lines.push('因'+d.reason+'，');
-    lines.push(fmtDW(d.date)+' '+hhmm(d.start)+'-'+(d.nextDay?'翌日':'')+hhmm(d.end)+' 需加班約 '+d.hours+' 小時，換抵方式：'+d.compLabel+'，');
+    lines.push('・日期：'+fmtDWk(d.date));
+    lines.push('・時間：'+d.start+' – '+(d.nextDay?'翌日':'')+d.end+'（共'+d.hours+'小時）');
+    lines.push('・事由：'+d.reason);
   } else {
     var multi=d.endDate&&d.endDate!==d.date;
-    subject='[差旅申請] '+full+' '+fmtDot(d.date)+(multi?'-'+fmtDot(d.endDate).slice(5):'');
-    lines.push('因'+(multi?fmtDW(d.date)+'至'+fmtDW(d.endDate):fmtDW(d.date))+' '+hhmm(d.start)+'-'+hhmm(d.end)+(d.allDay?'一整天':'')+'，');
-    lines.push('會前往在'+d.dest+'舉辦的'+d.reason+(d.noOffice?'、不會進辦':'')+'，');
-    lines.push('故需申請差旅，');
+    lines.push('・日期：'+fmtDWk(d.date)+(multi?' 至 '+fmtDWk(d.endDate):''));
+    lines.push('・時間：'+d.start+' – '+d.end);
+    lines.push('・地點：'+d.dest);
+    lines.push('・事由：'+d.reason);
+    lines.push('・是否進辦公室：'+(d.noOffice?'否':'是'));
+    if(d.transport) lines.push('・交通方式：'+d.transport);
   }
-  lines.push(ask); lines.push(''); lines.push(sig);
+  lines.push(''); lines.push(sig);
   return {subject:subject, body:lines.join('\r\n')};
 }
 function formURLFor(d){
@@ -679,7 +688,7 @@ renderHeader();
 try{ renderPlaces(); renderStatus(); renderApply(); renderReqs(); }
 catch(e){ showTab('settings'); toast('設定讀取失敗，請重新貼設定碼（'+e.message+'）','err'); }
 if(!cfg) showTab('settings');
-window.daka={version:'1.2',mailFor:mailFor,formURLFor:formURLFor,applyData:applyData};
+window.daka={version:'1.3',mailFor:mailFor,formURLFor:formURLFor,applyData:applyData};
 })();
 </script>
 </body>
