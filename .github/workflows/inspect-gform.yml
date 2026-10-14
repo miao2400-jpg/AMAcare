@@ -39,6 +39,10 @@ on:
         description: "Label 4"
         required: false
         default: "form4"
+      key:
+        description: "Secret used to seal resolved form URLs in the log (optional)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -50,7 +54,7 @@ jobs:
     steps:
       - name: Mask form URLs in the log
         run: |
-          for u in "${{ inputs.url1 }}" "${{ inputs.url2 }}" "${{ inputs.url3 }}" "${{ inputs.url4 }}"; do
+          for u in "${{ inputs.url1 }}" "${{ inputs.url2 }}" "${{ inputs.url3 }}" "${{ inputs.url4 }}" "${{ inputs.key }}"; do
             if [ -n "$u" ]; then echo "::add-mask::$u"; fi
           done
       - uses: actions/checkout@v4
@@ -67,4 +71,5 @@ jobs:
           GFORM_LABEL_3: ${{ inputs.label3 }}
           GFORM_URL_4: ${{ inputs.url4 }}
           GFORM_LABEL_4: ${{ inputs.label4 }}
+          GFORM_SEAL_KEY: ${{ inputs.key }}
         run: python -I .github/scripts/inspect_gform.py
