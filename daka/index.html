@@ -84,6 +84,16 @@
   .chk input{width:22px;height:22px;flex:0 0 auto}
   nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   body.typing nav.tabs{display:none}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
+  .chip{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line-strong);border-radius:999px;min-height:36px;padding:6px 14px;-webkit-tap-highlight-color:transparent}
+  .chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .hint{display:block;font-size:13px;color:var(--sub);margin-top:4px;min-height:18px}
+  .hint.err{color:var(--danger);font-weight:600}
+  .sync-ok{color:var(--safe)}
+  @media (min-width:720px){
+    header,main{max-width:640px;margin-left:auto;margin-right:auto}
+    nav.tabs{max-width:640px;left:50%;right:auto;width:100%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:14px 14px 0 0}
+  }
   nav.tabs button{flex:1;font:inherit;font-size:14px;color:var(--sub);background:transparent;border:0;padding:12px 4px 10px;-webkit-tap-highlight-color:transparent}
   nav.tabs button.on{color:var(--link);font-weight:700}
   .muted{color:var(--faint)}
@@ -146,8 +156,10 @@
     <div id="apply-fields"></div>
     <div id="apply-note" class="small" style="margin-top:10px"></div>
     <button class="btn primary block" id="btn-mail">① 寫信給主管</button>
+    <button class="btn block" id="btn-copy-mail">複製信件內容</button>
+    <p class="small" id="sender-hint" style="margin-top:6px" hidden></p>
     <button class="btn block" id="btn-form">② 開啟表單</button>
-    <p class="small" style="margin-top:8px">信會在你的郵件 App 打開，看一眼再按傳送。表單會在 Safari 打開，已幫你預填，檢查後按提交。兩件都做完，再到下面把方框打勾。</p>
+    <p class="small" style="margin-top:8px">信會在你的郵件 App 打開，看一眼再按傳送；打不開或開錯信箱時，用「複製信件內容」貼到 Outlook。表單會在 Safari 打開，已幫你預填，檢查後按提交。兩件都做完，再到下面把方框打勾。</p>
   </div>
   <div class="card">
     <h2>最近的申請</h2>
@@ -181,15 +193,21 @@
     <h2>我與公司</h2>
     <label class="f"><span>我的全名（信件主旨用，例如：王小明）</span><input id="cfg-fullname" type="text" autocomplete="name"></label>
     <label class="f"><span>信件署名（例如：小明）</span><input id="cfg-name" type="text"></label>
+    <label class="f"><span>我的公司信箱（寄件者，只用來提醒）</span><input id="cfg-sender" type="email" autocomplete="email" inputmode="email"></label>
     <label class="f"><span>主管稱呼（例如：王經理）</span><input id="cfg-sup-title" type="text"></label>
     <label class="f"><span>主管 Email</span><input id="cfg-sup-email" type="email" autocomplete="off" inputmode="email"></label>
     <label class="f"><span>HR 稱呼（例如：人資）</span><input id="cfg-hr-name" type="text"></label>
     <label class="f"><span>HR Email</span><input id="cfg-hr-email" type="email" autocomplete="off" inputmode="email"></label>
     <label class="chk" style="margin-top:6px"><input id="cfg-cc-hr" type="checkbox"> 寄給主管時副本 HR（先問過 HR 再勾）</label>
-    <div class="row">
-      <label class="f"><span>上班時間</span><input id="cfg-work-start" type="time"></label>
-      <label class="f"><span>下班時間</span><input id="cfg-work-end" type="time"></label>
-    </div>
+    <label class="f"><span>上班時間</span><input id="cfg-work-start" type="time"></label>
+    <label class="f"><span>下班時間</span><input id="cfg-work-end" type="time"></label>
+  </div>
+  <div class="card">
+    <h2>跨裝置同步（用你自己的 Google 試算表）</h2>
+    <label class="f"><span>同步網址（Apps Script 部署後的網址，結尾是 /exec）</span><input id="cfg-sync-url" type="url" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    <label class="f"><span>同步密碼</span><input id="cfg-sync-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    <button class="btn block" id="btn-sync-now">立即同步</button>
+    <p class="small" id="sync-status" style="margin-top:8px">尚未設定同步。</p>
   </div>
   <div class="card">
     <h2>打卡表單</h2>
@@ -223,7 +241,7 @@
   </div>
   <div class="card">
     <button class="btn danger block" id="btn-clear">清除這支手機上的所有資料</button>
-    <p class="small muted" style="margin-top:8px">版本 1.3 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
+    <p class="small muted" style="margin-top:8px">版本 1.4 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
   </div>
 </section>
 </main>
@@ -241,10 +259,12 @@
 (function(){
 'use strict';
 /* ───────── 儲存 ───────── */
-var KEY_CFG='daka.config', KEY_LOG='daka.log', KEY_REQ='daka.requests', KEY_PREF='daka.prefs';
+var KEY_CFG='daka.config', KEY_LOG='daka.log', KEY_REQ='daka.requests', KEY_PREF='daka.prefs', KEY_FREQ='daka.freq', KEY_SYNC='daka.sync';
 function load(k,def){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }
 function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ alert('無法儲存：'+e.message); } }
 var cfg=load(KEY_CFG,null), log=load(KEY_LOG,[]), reqs=load(KEY_REQ,[]), prefs=load(KEY_PREF,{place:'',other:''});
+var freq=load(KEY_FREQ,{}), syncState=load(KEY_SYNC,{});
+if(!freq||typeof freq!=='object') freq={}; if(!syncState||typeof syncState!=='object') syncState={};
 if(!Array.isArray(log)) log=[]; if(!Array.isArray(reqs)) reqs=[]; if(!prefs||typeof prefs!=='object') prefs={place:'',other:''};
 
 /* ───────── 工具 ───────── */
@@ -320,7 +340,11 @@ function renderPlaces(){
 }
 $('place-other').addEventListener('input',function(){ prefs.other=this.value; save(KEY_PREF,prefs); });
 
-function todayEntries(){ var t=todayISO(); return log.filter(function(r){ return r.date===t; }); }
+function liveLog(){ return log.filter(function(r){ return !r.deleted; }); }
+function nowMs(){ return Date.now(); }
+function saveLog(){ save(KEY_LOG,log); scheduleSync(); }
+function removeEntry(id){ log.forEach(function(r){ if(r.id===id){ r.deleted=true; r.updatedAt=nowMs(); } }); saveLog(); }
+function todayEntries(){ var t=todayISO(); return liveLog().filter(function(r){ return r.date===t; }); }
 function renderHeader(){ $('hdr-date').textContent=fmtDateLong(new Date()); }
 function renderStatus(){
   var t=todayEntries(), ins=t.filter(function(r){return r.type==='in';}), outs=t.filter(function(r){return r.type==='out';});
@@ -334,7 +358,7 @@ function renderStatus(){
     if(m&&(+m[1])!==(new Date().getMonth()+1)){ bm.textContent='設定裡的打卡表單是「'+cfg.forms.clockin.desc+'」，現在是 '+(new Date().getMonth()+1)+' 月，可能要向 HR 要新連結。'; bm.hidden=false; }
   }
   var bp=$('banner-pending'); bp.hidden=true;
-  var open=log.filter(function(r){ return r.status==='pending'||r.status==='unconfirmed'; });
+  var open=liveLog().filter(function(r){ return r.status==='pending'||r.status==='unconfirmed'; });
   if(open.length&&$('result-card').hidden){
     var o=open[open.length-1];
     bp.textContent='';
@@ -345,7 +369,7 @@ function renderStatus(){
 
 var TYPE_LABEL={in:'上班',out:'下班',trip:'上班時間公出'};
 var lockUntil=0, lastEntryId=null, lastType=null, waitTimer=null;
-function setStatus(id,st){ log.forEach(function(r){ if(r.id===id) r.status=st; }); save(KEY_LOG,log); }
+function setStatus(id,st){ log.forEach(function(r){ if(r.id===id){ r.status=st; r.updatedAt=nowMs(); } }); saveLog(); }
 function showErr(msg){ var e=$('result-err'); e.textContent=msg; e.hidden=false; }
 function placeValue(){ return prefs.place==='其他'?('其他:'+(prefs.other||'').trim()):prefs.place; }
 function prefillURL(type){
@@ -367,7 +391,8 @@ function punch(type){
   var body=$('result-body'); body.textContent='';
   clearTimeout(waitTimer); $('result-err').hidden=true; $('btn-confirm').hidden=true;
   var entry={id:uid(),ts:now.toISOString(),date:todayISO(now),time:nowHM(now),type:type,place:placeValue(),status:(mode==='iframe'?'pending':'unconfirmed')};
-  log.push(entry); save(KEY_LOG,log); lastEntryId=entry.id; lastType=type;
+  entry.updatedAt=nowMs(); entry.device=deviceLabel();
+  log.push(entry); saveLog(); lastEntryId=entry.id; lastType=type;
   lockUntil=Date.now()+8000; setLocked(true); setTimeout(function(){ setLocked(false); },8000);
   if(mode==='iframe'){
     var fields={}, token=fbzx();
@@ -405,7 +430,7 @@ $('btn-confirm').addEventListener('click',function(){
 $('btn-undo').addEventListener('click',function(){
   if(!lastEntryId) return;
   if(!confirm('刪除剛才這筆本機紀錄？（Google 那邊如果已經收到，不會被刪掉）')) return;
-  log=log.filter(function(r){ return r.id!==lastEntryId; }); save(KEY_LOG,log); lastEntryId=null;
+  removeEntry(lastEntryId); lastEntryId=null;
   clearTimeout(waitTimer); lockUntil=0; setLocked(false); $('result-card').hidden=true; $('result-frame').innerHTML=''; renderStatus();
 });
 $('btn-open-form').addEventListener('click',function(){
@@ -420,17 +445,18 @@ $('btn-test-open').addEventListener('click',function(){
 
 /* 回到前景、跨日時重新整理畫面 */
 var shownDay=todayISO();
-function refresh(){
+function refresh(ev){
   if(document.hidden) return;
   renderHeader();
   var t=todayISO();
   if(t!==shownDay){
-    ['ap-date','ap-end-date'].forEach(function(id){ var e=$(id); if(e&&e.value===shownDay) e.value=t; });
-    var cur=log.filter(function(r){ return r.id===lastEntryId; })[0];
+    ['ap-date','ap-end-date'].forEach(function(id){ var e=$(id); if(e&&parseDateInput(e.value)===shownDay){ e.value=mmdd(t); e.dispatchEvent(new Event('input')); } });
+    var cur=liveLog().filter(function(r){ return r.id===lastEntryId; })[0];
     if(!(cur&&(cur.status==='unconfirmed'||cur.status==='pending'))){ clearTimeout(waitTimer); $('result-card').hidden=true; $('result-frame').innerHTML=''; lastEntryId=null; }
     shownDay=t;
   }
   renderStatus();
+  syncNow(false, !!(ev&&ev.type));
 }
 if(window.visualViewport){ window.visualViewport.addEventListener('resize',function(){ document.body.classList.toggle('typing', window.visualViewport.height<window.innerHeight*0.75); }); }
 document.addEventListener('visibilitychange',refresh);
@@ -454,6 +480,52 @@ function field(id,label,type,value,extra){
   return el('label',{class:'f'},[el('span',{text:label}),inp]);
 }
 function addHours(hm,h){ var p=hm.split(':'); var d=new Date(2000,0,1,+p[0],+p[1]); d.setMinutes(d.getMinutes()+h*60); return nowHM(d); }
+/* 時間：四位數 24 小時制，1630 = 16:30，0400 = 04:00，930 = 09:30 */
+function parseTimeInput(v){
+  v=String(v||'').trim().replace(/[：.]/g,':');
+  var m=/^(\d{1,2}):(\d{2})$/.exec(v);
+  if(!m){ var dgt=v.replace(/\D/g,''); if(dgt.length===3||dgt.length===4) m=[null,dgt.slice(0,dgt.length-2),dgt.slice(-2)]; else if(dgt.length>=1&&dgt.length<=2) m=[null,dgt,'00']; }
+  if(!m) return '';
+  var h=+m[1], mi=+m[2]; if(h>23||mi>59) return '';
+  return pad(h)+':'+pad(mi);
+}
+function zhTime(hm){ var p=hm.split(':'), h=+p[0], mi=p[1]; var tag=h<5?'凌晨':h<12?'上午':h===12?'中午':h<18?'下午':'晚上'; var h12=h%12===0?12:h%12; return tag+' '+h12+':'+mi; }
+/* 日期：1020 = 今年 10/20；比今天早超過 60 天就算明年 */
+function mmdd(iso){ var p=iso.split('-'); return p[1]+p[2]; }
+function parseDateInput(v){
+  var dgt=String(v||'').replace(/\D/g,''), y, mo, da, now=new Date();
+  if(dgt.length===8){ y=+dgt.slice(0,4); mo=+dgt.slice(4,6); da=+dgt.slice(6); }
+  else if(dgt.length===4||dgt.length===3){ mo=+dgt.slice(0,dgt.length-2); da=+dgt.slice(-2); y=now.getFullYear(); }
+  else return '';
+  if(mo<1||mo>12||da<1) return '';
+  var d=new Date(y,mo-1,da); if(d.getMonth()!==mo-1) return '';
+  if(dgt.length!==8){ var today=new Date(now.getFullYear(),now.getMonth(),now.getDate()); if((today-d)/86400000>60) d=new Date(y+1,mo-1,da); }
+  return todayISO(d);
+}
+function chipOrder(key,defaults){
+  var cnt=freq[key]||{}, seen={}, list=[];
+  Object.keys(cnt).concat(defaults).forEach(function(t){ if(!seen[t]&&/^\d\d:\d\d$/.test(t)){ seen[t]=1; list.push(t); } });
+  return list.sort(function(a,b){ return (cnt[b]||0)-(cnt[a]||0)||defaults.indexOf(a)-defaults.indexOf(b); }).slice(0,4);
+}
+function bumpFreq(key,hm){ if(!hm) return; freq[key]=freq[key]||{}; freq[key][hm]=(freq[key][hm]||0)+1; save(KEY_FREQ,freq); }
+function timeField(id,label,key,value,defaults){
+  var inp=el('input',{id:id,type:'text',inputmode:'numeric',autocomplete:'off',placeholder:'例如 0930',value:value||''});
+  var hint=el('span',{class:'hint'}), chips=el('div',{class:'chips'});
+  function upd(){ var v=parseTimeInput(inp.value); hint.textContent=inp.value?(v?zhTime(v):'請輸入四位數，例如 0930 或 1630'):''; hint.className='hint'+(inp.value&&!v?' err':''); chips.querySelectorAll('.chip').forEach(function(c){ c.classList.toggle('on',c.textContent===v); }); }
+  chipOrder(key,defaults).forEach(function(t){ var c=el('button',{type:'button',class:'chip',text:t}); c.addEventListener('click',function(){ inp.value=t; upd(); }); chips.appendChild(c); });
+  inp.addEventListener('input',upd);
+  inp.addEventListener('blur',function(){ var v=parseTimeInput(inp.value); if(v) inp.value=v; upd(); });
+  var w=el('div',{class:'f'},[el('span',{class:'small',text:label}),chips,inp,hint]); w.style.margin='10px 0 0';
+  setTimeout(upd,0); return w;
+}
+function dateField(id,label,iso){
+  var inp=el('input',{id:id,type:'text',inputmode:'numeric',autocomplete:'off',placeholder:'例如 1020',value:iso?mmdd(iso):''});
+  var hint=el('span',{class:'hint'});
+  function upd(){ var v=parseDateInput(inp.value); hint.textContent=inp.value?(v?(v.slice(0,4)!==String(new Date().getFullYear())?v.slice(0,4)+'/':'')+fmtDWk(v):'請輸入四位數，例如 1020'):''; hint.className='hint'+(inp.value&&!v?' err':''); }
+  inp.addEventListener('input',upd);
+  var w=el('div',{class:'f'},[el('span',{class:'small',text:label}),inp,hint]); w.style.margin='10px 0 0';
+  setTimeout(upd,0); return w;
+}
 function renderApply(){
   var box=$('apply-fields'); box.innerHTML='';
   var ws=normHM(cfg&&cfg.work&&cfg.work.start,'09:00'), we=normHM(cfg&&cfg.work&&cfg.work.end,'18:00');
@@ -462,15 +534,17 @@ function renderApply(){
     var types=strList(cfg&&cfg.forms&&cfg.forms.leave&&cfg.forms.leave.types,['事假','病假','特別休假']).map(function(t){return {v:t,t:t};}).concat([{v:'__other__',t:'其他'}]);
     box.appendChild(field('ap-type','假別','select',types[0].v,types));
     var ow=field('ap-type-other','其他假別','text','',{placeholder:'例如：公假'}); ow.id='ap-type-other-wrap'; ow.hidden=true; box.appendChild(ow);
-    box.appendChild(field('ap-date','請假日期','date',todayISO()));
-    var r=el('div',{class:'row'}); r.appendChild(field('ap-start','起始時間','time',ws)); r.appendChild(field('ap-end','結束時間','time',we)); box.appendChild(r);
+    box.appendChild(dateField('ap-date','請假日期',todayISO()));
+    box.appendChild(timeField('ap-start','起始時間','leave.start',ws,[ws,'13:00','14:00']));
+    box.appendChild(timeField('ap-end','結束時間','leave.end',we,[we,'12:00','17:00']));
     box.appendChild(field('ap-reason','請假事由','text','',{placeholder:'例如：家裡有事要處理'}));
     box.appendChild(field('ap-handover','工作交接（選填）','text','',{placeholder:'例如：已交接給同事○○'}));
     $('ap-type').addEventListener('change',function(){ $('ap-type-other-wrap').hidden=(this.value!=='__other__'); });
     note.textContent='請假要事先提出。寄信、填表單都做完，HR 才會處理。';
   } else if(kind==='overtime'){
-    box.appendChild(field('ap-date','加班日期','date',todayISO()));
-    var r2=el('div',{class:'row'}); r2.appendChild(field('ap-start','起始時間','time',we)); r2.appendChild(field('ap-end','結束時間','time',addHours(we,2))); box.appendChild(r2);
+    box.appendChild(dateField('ap-date','加班日期',todayISO()));
+    box.appendChild(timeField('ap-start','起始時間','overtime.start',we,[we,'18:30','19:00']));
+    box.appendChild(timeField('ap-end','結束時間','overtime.end',addHours(we,2),[addHours(we,2),addHours(we,1),addHours(we,3)]));
     box.appendChild(field('ap-reason','加班事由','text','',{placeholder:'例如：趕 10/20 的提案'}));
     var comps=strList(cfg&&cfg.forms&&cfg.forms.overtime&&cfg.forms.overtime.comps,['補休','加班費']).map(function(c){ return {v:c,t:c.split('(')[0]}; });
     box.appendChild(field('ap-comp','換抵方式','select',comps[0].v,comps));
@@ -478,35 +552,38 @@ function renderApply(){
   } else {
     box.appendChild(field('ap-dest','地點','text','',{placeholder:'例如：台北某大樓'}));
     box.appendChild(field('ap-reason','活動或事由','text','',{placeholder:'例如：某某研討會'}));
-    var r3=el('div',{class:'row'}); r3.appendChild(field('ap-date','出發日','date',todayISO())); r3.appendChild(field('ap-end-date','結束日','date',todayISO())); box.appendChild(r3);
-    var r4=el('div',{class:'row'}); r4.appendChild(field('ap-start','起始時間','time',ws)); r4.appendChild(field('ap-end','結束時間','time',we)); box.appendChild(r4);
-    var cks=el('div',{class:'row'});
-    var c2=el('input',{type:'checkbox',id:'ap-nooffice'}); c2.checked=true; cks.appendChild(el('label',{class:'chk'},[c2,'不進辦公室']));
-    box.appendChild(cks);
+    box.appendChild(dateField('ap-date','出發日',todayISO()));
+    box.appendChild(dateField('ap-end-date','結束日',todayISO()));
+    box.appendChild(timeField('ap-start','起始時間','travel.start',ws,[ws,'08:00','13:00']));
+    box.appendChild(timeField('ap-end','結束時間','travel.end',we,[we,'17:00','12:00']));
+    var c2=el('input',{type:'checkbox',id:'ap-nooffice'}); c2.checked=true; box.appendChild(el('label',{class:'chk'},[c2,'不進辦公室']));
     box.appendChild(field('ap-transport','交通方式（選填）','text','',{placeholder:'例如：捷運、高鐵、自行開車'}));
     note.textContent='差旅表單需要登入公司 Google 帳號，所以不能預填，開啟後請自己填。出差期間每天還是要打卡，地點選「其他」填地點。';
   }
+  renderSenderHint();
 }
 function applyData(){
   var d={kind:kind};
-  d.date=$('ap-date').value; d.reason=($('ap-reason').value||'').trim();
-  d.start=$('ap-start').value; d.end=$('ap-end').value;
+  d.date=parseDateInput($('ap-date').value); d.reason=($('ap-reason').value||'').trim();
+  d.start=parseTimeInput($('ap-start').value); d.end=parseTimeInput($('ap-end').value);
   if(kind==='leave'){ d.type=$('ap-type').value; d.typeOther=($('ap-type-other')?$('ap-type-other').value:'').trim(); d.typeLabel=(d.type==='__other__'?d.typeOther:d.type); }
   if(kind==='overtime'){ d.comp=$('ap-comp').value; d.compLabel=d.comp.split('(')[0]; var span=toMin(d.end)-toMin(d.start); d.nextDay=span<0; if(span<0) span+=1440; d.hours=Math.round(span/60*10)/10; }
-  if(kind==='travel'){ d.dest=($('ap-dest').value||'').trim(); d.endDate=$('ap-end-date').value||d.date; d.noOffice=$('ap-nooffice').checked; d.transport=($('ap-transport').value||'').trim(); }
+  if(kind==='travel'){ d.dest=($('ap-dest').value||'').trim(); d.endDate=parseDateInput($('ap-end-date').value)||d.date; d.noOffice=$('ap-nooffice').checked; d.transport=($('ap-transport').value||'').trim(); }
   if(kind==='leave'){ d.handover=($('ap-handover').value||'').trim(); d.hours=leaveHours(d.start,d.end); }
   return d;
 }
 function validate(d){
-  if(!d.date) return '請選日期';
+  if(!d.date) return '請輸入日期，例如 1020';
   if(kind==='leave'&&!d.typeLabel) return '請選假別';
   if(kind==='travel'&&!d.dest) return '請填地點';
   if(!d.reason) return kind==='travel'?'請填活動或事由':'請填事由';
-  if(!d.start||!d.end) return '請填起始與結束時間';
+  if(!d.start||!d.end) return '請輸入時間，例如 0930 或 1630';
   if(toMin(d.end)===toMin(d.start)||(kind!=='overtime'&&toMin(d.end)<toMin(d.start))) return '結束時間要在起始時間之後';
   if(kind==='travel'&&d.endDate<d.date) return '結束日不能早於出發日';
   return '';
 }
+function recordUse(d){ bumpFreq(d.kind+'.start',d.start); bumpFreq(d.kind+'.end',d.end); }
+function renderSenderHint(){ var h=$('sender-hint'), e=cfg&&cfg.senderEmail; h.hidden=!e; if(e) h.textContent='寄出前確認寄件者是 '+e+'。'; }
 function summary(d){
   if(d.kind==='leave') return fmtMD(d.date)+' '+d.start+'–'+d.end+' '+d.typeLabel;
   if(d.kind==='overtime') return fmtMD(d.date)+' 加班 '+d.start+'–'+(d.nextDay?'翌日':'')+d.end;
@@ -566,14 +643,20 @@ $('btn-mail').addEventListener('click',function(){
   if(!cfg||!cfg.supervisor||!cfg.supervisor.email){ showTab('settings'); toast('請先填主管 Email','err'); $('cfg-sup-email').focus(); return; }
   var m=mailFor(d), to=cfg.supervisor.email, cc=(cfg.ccHr&&cfg.hr&&cfg.hr.email)?cfg.hr.email:'';
   var url='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(m.subject)+'&body='+encodeURIComponent(m.body)+(cc?'&cc='+encodeURIComponent(cc):'');
-  upsertReq(d); save(KEY_REQ,reqs); renderReqs();
+  upsertReq(d); save(KEY_REQ,reqs); renderReqs(); recordUse(d);
   window.location.href=url;
+});
+$('btn-copy-mail').addEventListener('click',function(){
+  var d=applyData(), err=validate(d); if(err){ alert(err); return; }
+  var m=mailFor(d), to=(cfg&&cfg.supervisor&&cfg.supervisor.email)||'';
+  upsertReq(d); save(KEY_REQ,reqs); renderReqs(); recordUse(d);
+  copyText((to?'收件者：'+to+'\n':'')+'主旨：'+m.subject+'\n\n'+m.body.replace(/\r\n/g,'\n'),'已複製信件內容，到 Outlook 新增郵件後貼上，主旨記得剪下貼到主旨欄。');
 });
 $('btn-form').addEventListener('click',function(){
   var d=applyData(), err=validate(d); if(err){ alert(err); return; }
   if(!hasForm(d.kind)){ showTab('settings'); toast('設定碼裡沒有這張表單，請重新產生設定碼','err'); return; }
   var url=formURLFor(d); if(!url){ showTab('settings'); toast('表單網址無效，請重新套用設定碼','err'); return; }
-  upsertReq(d); save(KEY_REQ,reqs); renderReqs();
+  upsertReq(d); save(KEY_REQ,reqs); renderReqs(); recordUse(d);
   if(!openExternal(url)){ var n=$('apply-note'); n.innerHTML=''; n.appendChild(el('a',{href:url,target:'_blank',rel:'noopener',class:'btn primary block',text:'打開表單'})); }
 });
 var KIND_LABEL={leave:'請假',overtime:'加班',travel:'差旅'};
@@ -597,21 +680,21 @@ function renderReqs(){
 /* ───────── 紀錄 ───────── */
 var STATUS_LABEL={unconfirmed:'未確認提交',pending:'未收到 Google 回應'};
 function renderLog(){
-  var ul=$('log-list'); ul.innerHTML=''; $('log-empty').hidden=log.length>0;
-  log.slice().reverse().slice(0,120).forEach(function(r){
+  var ul=$('log-list'), live=liveLog(); ul.innerHTML=''; $('log-empty').hidden=live.length>0;
+  live.slice().sort(function(a,b){ return a.ts<b.ts?-1:1; }).reverse().slice(0,120).forEach(function(r){
     var li=el('li'), t=el('div',{class:'t'});
-    var head=el('div',{},[el('b',{text:r.date+' '+r.time}),' '+(TYPE_LABEL[r.type]||r.type)]);
+    var head=el('div',{},[el('b',{text:r.date+' '+r.time}),' '+(TYPE_LABEL[r.type]||r.type)+(r.device?' · '+r.device:'')]);
     if(STATUS_LABEL[r.status]) head.appendChild(el('span',{class:'tag',text:STATUS_LABEL[r.status]}));
     t.appendChild(head);
     t.appendChild(el('div',{class:'small',text:r.place}));
     li.appendChild(t);
     if(STATUS_LABEL[r.status]){ var ok=el('button',{class:'x',text:'已提交',style:'color:var(--safe)'}); ok.addEventListener('click',function(){ setStatus(r.id,'confirmed'); renderLog(); renderStatus(); }); li.appendChild(ok); }
-    var x=el('button',{class:'x',text:'刪除'}); x.addEventListener('click',function(){ if(confirm('刪除這筆本機紀錄？')){ log=log.filter(function(q){return q.id!==r.id;}); save(KEY_LOG,log); renderLog(); renderStatus(); } });
+    var x=el('button',{class:'x',text:'刪除'}); x.addEventListener('click',function(){ if(confirm('刪除這筆紀錄？（Google 表單那邊不會被刪）')){ removeEntry(r.id); renderLog(); renderStatus(); } });
     li.appendChild(x); ul.appendChild(li);
   });
 }
 $('btn-csv').addEventListener('click',function(){
-  var csv='日期,時間,類型,地點,狀態\n'+log.map(function(r){ return [r.date,r.time,TYPE_LABEL[r.type]||r.type,'"'+String(r.place).replace(/"/g,'""')+'"',STATUS_LABEL[r.status]||'已送出'].join(','); }).join('\n');
+  var csv='日期,時間,類型,地點,狀態\n'+liveLog().map(function(r){ return [r.date,r.time,TYPE_LABEL[r.type]||r.type,'"'+String(r.place).replace(/"/g,'""')+'"',STATUS_LABEL[r.status]||'已送出'].join(','); }).join('\n');
   copyText(csv,'已複製 CSV，可以貼到備忘錄或 Excel');
 });
 function copyText(text,okMsg){
@@ -622,7 +705,8 @@ function copyText(text,okMsg){
 /* ───────── 設定 ───────── */
 function renderSettings(){
   var c=cfg||{};
-  $('cfg-fullname').value=c.fullName||''; $('cfg-name').value=c.name||'';
+  $('cfg-fullname').value=c.fullName||''; $('cfg-name').value=c.name||''; $('cfg-sender').value=c.senderEmail||'';
+  $('cfg-sync-url').value=(c.sync&&c.sync.url)||''; $('cfg-sync-token').value=(c.sync&&c.sync.token)||''; renderSyncStatus();
   $('cfg-sup-title').value=(c.supervisor&&c.supervisor.title)||''; $('cfg-sup-email').value=(c.supervisor&&c.supervisor.email)||'';
   $('cfg-hr-name').value=(c.hr&&c.hr.name)||''; $('cfg-hr-email').value=(c.hr&&c.hr.email)||''; $('cfg-cc-hr').checked=!!c.ccHr;
   $('cfg-work-start').value=normHM(c.work&&c.work.start,'09:00'); $('cfg-work-end').value=normHM(c.work&&c.work.end,'18:00');
@@ -632,7 +716,10 @@ function renderSettings(){
 function readSettings(){
   cfg=cfg||{v:1,forms:{}}; cfg.forms=cfg.forms||{}; cfg.supervisor=cfg.supervisor||{}; cfg.hr=cfg.hr||{}; cfg.work=cfg.work||{};
   var ows=cfg.work.start, owe=cfg.work.end;
-  cfg.fullName=$('cfg-fullname').value.trim(); cfg.name=$('cfg-name').value.trim();
+  cfg.fullName=$('cfg-fullname').value.trim(); cfg.name=$('cfg-name').value.trim(); cfg.senderEmail=$('cfg-sender').value.trim();
+  var su=$('cfg-sync-url').value.trim(), st=$('cfg-sync-token').value.trim();
+  if(su&&!isSyncURL(su)){ toast('同步網址要是 https://script.google.com/macros/s/…/exec','err'); }
+  else cfg.sync={url:su,token:st};
   cfg.supervisor.title=$('cfg-sup-title').value.trim(); cfg.supervisor.email=$('cfg-sup-email').value.trim();
   cfg.hr.name=$('cfg-hr-name').value.trim(); cfg.hr.email=$('cfg-hr-email').value.trim(); cfg.ccHr=$('cfg-cc-hr').checked;
   cfg.work.start=$('cfg-work-start').value||'09:00'; cfg.work.end=$('cfg-work-end').value||'18:00';
@@ -645,10 +732,10 @@ function readSettings(){
   }
   if(cfg.forms.clockin) cfg.forms.clockin.desc=$('cfg-clockin-desc').value.trim();
   cfg.submitMode=$('cfg-submit-mode').value;
-  save(KEY_CFG,cfg); renderStatus(); renderPlaces();
+  cfg.updatedAt=nowMs(); save(KEY_CFG,cfg); renderStatus(); renderPlaces(); renderSenderHint(); scheduleSync();
   if(ows!==cfg.work.start||owe!==cfg.work.end) renderApply();
 }
-['cfg-fullname','cfg-name','cfg-sup-title','cfg-sup-email','cfg-hr-name','cfg-hr-email','cfg-cc-hr','cfg-work-start','cfg-work-end','cfg-clockin-url','cfg-clockin-desc','cfg-submit-mode'].forEach(function(id){ $(id).addEventListener('change',readSettings); });
+['cfg-fullname','cfg-name','cfg-sender','cfg-sync-url','cfg-sync-token','cfg-sup-title','cfg-sup-email','cfg-hr-name','cfg-hr-email','cfg-cc-hr','cfg-work-start','cfg-work-end','cfg-clockin-url','cfg-clockin-desc','cfg-submit-mode'].forEach(function(id){ $(id).addEventListener('change',readSettings); });
 $('btn-apply-code').addEventListener('click',function(){
   var code=$('setup-code').value.trim(); if(!code){ toast('請先貼上設定碼','err'); return; }
   var obj; try{ obj=JSON.parse(b64dec(code)); }catch(e){ toast('設定碼看起來不完整，請整段重新複製貼上','err'); return; }
@@ -663,11 +750,13 @@ $('btn-apply-code').addEventListener('click',function(){
   var incomplete=['leave','overtime'].filter(function(k){ return obj.forms[k]&&obj.forms[k].url&&!formComplete(k,obj.forms[k]); });
   var keep=cfg||{};
   cfg=obj;
-  ['name','fullName'].forEach(function(k){ if(!cfg[k]&&keep[k]) cfg[k]=keep[k]; });
+  ['name','fullName','senderEmail','sync'].forEach(function(k){ if(!cfg[k]&&keep[k]) cfg[k]=keep[k]; });
+  if(cfg.sync&&!(isSyncURL(cfg.sync.url)||!cfg.sync.url)) cfg.sync={url:'',token:''};
+  cfg.updatedAt=nowMs();
   ['submitMode','work','ccHr'].forEach(function(k){ if(cfg[k]==null&&keep[k]!=null) cfg[k]=keep[k]; });
   if(keep.supervisor&&keep.supervisor.email&&!(cfg.supervisor&&cfg.supervisor.email)) cfg.supervisor=keep.supervisor;
   if(keep.hr&&keep.hr.email&&!(cfg.hr&&cfg.hr.email)) cfg.hr=keep.hr;
-  save(KEY_CFG,cfg); renderSettings(); renderStatus(); renderPlaces(); renderApply(); $('setup-code').value='';
+  save(KEY_CFG,cfg); renderSettings(); renderStatus(); renderPlaces(); renderApply(); $('setup-code').value=''; syncNow(true);
   toast('設定碼已套用：'+(cfg.forms.clockin.title||'打卡表單')+(cfg.forms.clockin.desc?'（'+cfg.forms.clockin.desc+'）':'')+(incomplete.length?' 注意：'+incomplete.map(function(k){return KIND_LABEL[k];}).join('、')+'表單的代號不完整，請重新產生設定碼。':'')+(inSafari?' 提醒：加入主畫面後，要在主畫面的 App 裡再貼一次設定碼。':''),incomplete.length?'err':'');
 });
 $('btn-export-code').addEventListener('click',function(){
@@ -676,12 +765,65 @@ $('btn-export-code').addEventListener('click',function(){
 });
 $('btn-clear').addEventListener('click',function(){
   if(!confirm('確定清除設定、打卡紀錄、申請紀錄？')) return;
-  [KEY_CFG,KEY_LOG,KEY_REQ,KEY_PREF].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
-  cfg=null; log=[]; reqs=[]; prefs={place:'',other:''};
+  [KEY_CFG,KEY_LOG,KEY_REQ,KEY_PREF,KEY_FREQ,KEY_SYNC].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  cfg=null; log=[]; reqs=[]; prefs={place:'',other:''}; freq={}; syncState={}; clearTimeout(syncTimer);
   clearTimeout(waitTimer); lastEntryId=null; lastType=null; lockUntil=0; setLocked(false);
   $('result-card').hidden=true; $('result-frame').innerHTML=''; $('result-err').hidden=true; $('btn-confirm').hidden=true;
   renderSettings(); renderStatus(); renderPlaces(); renderLog(); renderReqs(); renderApply(); showTab('settings');
 });
+
+/* ───────── 同步（Google 試算表） ───────── */
+function isSyncURL(u){ return /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u||''); }
+function deviceLabel(){ var ua=navigator.userAgent; return /iPhone/.test(ua)?'iPhone':/iPad/.test(ua)?'iPad':/Android/.test(ua)?'Android':/Mac/.test(ua)?'Mac':/Windows/.test(ua)?'電腦':'其他'; }
+var syncTimer=null, syncBusy=false, lastSyncTry=0;
+function syncReady(){ return !!(cfg&&cfg.sync&&isSyncURL(cfg.sync.url)&&cfg.sync.token); }
+function scheduleSync(){ if(!syncReady()) return; clearTimeout(syncTimer); syncTimer=setTimeout(function(){ syncNow(true); },1500); }
+function renderSyncStatus(msg,kind){
+  var e=$('sync-status'); if(!e) return;
+  if(msg){ e.textContent=msg; e.className='small '+(kind||''); return; }
+  if(!syncReady()){ e.textContent='尚未設定同步。'; e.className='small'; return; }
+  if(syncState.err){ e.textContent='上次同步失敗：'+syncState.err; e.className='small err'; return; }
+  e.textContent=syncState.at?'上次同步：'+syncState.at:'已設定，尚未同步。'; e.className='small'+(syncState.at?' sync-ok':'');
+}
+function mergeRemote(res){
+  var changed=false, byId={};
+  log.forEach(function(r){ byId[r.id]=r; });
+  (Array.isArray(res.log)?res.log:[]).forEach(function(r){
+    if(!r||typeof r!=='object'||!r.id) return;
+    var mine=byId[r.id];
+    if(!mine){ log.push(r); byId[r.id]=r; changed=true; }
+    else if((r.updatedAt||0)>(mine.updatedAt||0)){ Object.keys(r).forEach(function(k){ mine[k]=r[k]; }); changed=true; }
+  });
+  if(changed){ log.sort(function(a,b){ return a.ts<b.ts?-1:1; }); save(KEY_LOG,log); }
+  var rc=res.config;
+  if(rc&&typeof rc==='object'&&rc.forms&&rc.forms.clockin&&isFormURL(rc.forms.clockin.url)&&(rc.updatedAt||0)>((cfg&&cfg.updatedAt)||0)){
+    var mySync=cfg.sync; cfg=rc; if(!syncReady()) cfg.sync=mySync; save(KEY_CFG,cfg); renderSettings(); renderPlaces(); renderApply(); changed=true;
+  }
+  return changed;
+}
+function syncNow(force,soon){
+  if(!syncReady()||syncBusy||document.hidden) return;
+  if(Date.now()-lastSyncTry<(force?3000:soon?15000:300000)) return;
+  if(navigator.onLine===false){ syncState.err='沒有網路'; renderSyncStatus(); return; }
+  syncBusy=true; lastSyncTry=Date.now(); renderSyncStatus('同步中…');
+  var since=syncState.pushedAt||0;
+  var payload={op:'sync',token:cfg.sync.token,device:deviceLabel(),
+    upsert:log.filter(function(r){ return (r.updatedAt||0)>since; }),
+    config:((cfg.updatedAt||0)>(syncState.configAt||0))?cfg:null};
+  var startedAt=Date.now();
+  fetch(cfg.sync.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),redirect:'follow'})
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(!res||!res.ok) throw new Error(res&&res.error==='unauthorized'?'同步密碼不對':(res&&res.error)||'回應格式不對');
+      var changed=mergeRemote(res);
+      syncState={pushedAt:startedAt,configAt:Math.max(cfg.updatedAt||0,startedAt),at:fmtDateLong(new Date())+' '+nowHM(),err:''};
+      save(KEY_SYNC,syncState);
+      if(changed){ renderStatus(); if(!$('tab-log').hidden) renderLog(); }
+    })
+    .catch(function(e){ syncState.err=(e&&e.message)||'連不上'; save(KEY_SYNC,syncState); })
+    .then(function(){ syncBusy=false; renderSyncStatus(); });
+}
+$('btn-sync-now').addEventListener('click',function(){ readSettings(); if(!syncReady()){ renderSyncStatus('請先填同步網址和同步密碼。','err'); return; } syncNow(true); });
 
 /* ───────── 啟動 ───────── */
 $('banner-safari').hidden=!inSafari; $('banner-inapp').hidden=!inAppBrowser;
@@ -689,7 +831,8 @@ renderHeader();
 try{ renderPlaces(); renderStatus(); renderApply(); renderReqs(); }
 catch(e){ showTab('settings'); toast('設定讀取失敗，請重新貼設定碼（'+e.message+'）','err'); }
 if(!cfg) showTab('settings');
-window.daka={version:'1.3',mailFor:mailFor,formURLFor:formURLFor,applyData:applyData};
+renderSyncStatus(); syncNow(true);
+window.daka={version:'1.4',parseTimeInput:parseTimeInput,parseDateInput:parseDateInput,syncNow:syncNow,mailFor:mailFor,formURLFor:formURLFor,applyData:applyData};
 })();
 </script>
 </body>
