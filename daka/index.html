@@ -529,6 +529,7 @@ function mailFor(d){
     lines.push('・日期：'+fmtDWk(d.date));
     lines.push('・時間：'+d.start+' – '+(d.nextDay?'翌日':'')+d.end+'（共'+d.hours+'小時）');
     lines.push('・事由：'+d.reason);
+    lines.push('・換抵方式：'+d.compLabel);
   } else {
     var multi=d.endDate&&d.endDate!==d.date;
     lines.push('・日期：'+fmtDWk(d.date)+(multi?' 至 '+fmtDWk(d.endDate):''));
