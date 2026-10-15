@@ -90,6 +90,7 @@
   .hint{display:block;font-size:13px;color:var(--sub);margin-top:4px;min-height:18px}
   .hint.err{color:var(--danger);font-weight:600}
   .sync-ok{color:var(--safe)}
+  .req-head{font:inherit;color:var(--ink);background:transparent;border:0;padding:6px 0;text-align:left;width:100%;min-height:44px;text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:4px}
   @media (min-width:720px){
     header,main{max-width:640px;margin-left:auto;margin-right:auto}
     nav.tabs{max-width:640px;left:50%;right:auto;width:100%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:14px 14px 0 0}
@@ -241,7 +242,7 @@
   </div>
   <div class="card">
     <button class="btn danger block" id="btn-clear">清除這支手機上的所有資料</button>
-    <p class="small muted" style="margin-top:8px">版本 1.4 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
+    <p class="small muted" style="margin-top:8px">版本 1.5 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
   </div>
 </section>
 </main>
@@ -558,7 +559,8 @@ function renderApply(){
     box.appendChild(timeField('ap-end','結束時間','travel.end',we,[we,'17:00','12:00']));
     var c2=el('input',{type:'checkbox',id:'ap-nooffice'}); c2.checked=true; box.appendChild(el('label',{class:'chk'},[c2,'不進辦公室']));
     box.appendChild(field('ap-transport','交通方式（選填）','text','',{placeholder:'例如：捷運、高鐵、自行開車'}));
-    note.textContent='差旅表單需要登入公司 Google 帳號，所以不能預填，開啟後請自己填。出差期間每天還是要打卡，地點選「其他」填地點。';
+    var tf=cfg&&cfg.forms&&cfg.forms.travel;
+    note.textContent=(tf&&isEntry(tf.date)?'差旅表單要登入 Google 才能填，會幫你預填日期、時間和事由（地點會寫在事由前面），附件請自己上傳。':'差旅表單要登入 Google 才能填，開啟後請自己填。')+'出差期間每天還是要打卡，地點選「其他」填地點。';
   }
   renderSenderHint();
 }
@@ -621,7 +623,15 @@ function mailFor(d){
 }
 function formURLFor(d){
   var f=cfg&&cfg.forms&&cfg.forms[d.kind]; if(!f||!isFormURL(f.url)) return '';
-  if(d.kind==='travel') return f.url;
+  if(d.kind==='travel'){
+    if(!(isEntry(f.date)&&isEntry(f.endDate)&&isEntry(f.start)&&isEntry(f.end)&&isEntry(f.reason))) return f.url;
+    var tp={usp:'pp_url'}, a=d.date.split('-'), b=(d.endDate||d.date).split('-'), ts=d.start.split(':'), te=d.end.split(':');
+    tp[f.date+'_year']=a[0]; tp[f.date+'_month']=String(+a[1]); tp[f.date+'_day']=String(+a[2]);
+    tp[f.endDate+'_year']=b[0]; tp[f.endDate+'_month']=String(+b[1]); tp[f.endDate+'_day']=String(+b[2]);
+    tp[f.start+'_hour']=ts[0]; tp[f.start+'_minute']=ts[1]; tp[f.end+'_hour']=te[0]; tp[f.end+'_minute']=te[1];
+    tp[f.reason]=(d.dest?d.dest+' ':'')+d.reason;
+    return f.url+'?'+qs(tp);
+  }
   var p={usp:'pp_url'}, dp=d.date.split('-');
   if(d.kind==='leave'){
     if(d.type==='__other__'){ p[f.type]='__other_option__'; p[f.type+'.other_option_response']=d.typeOther; } else p[f.type]=d.type;
@@ -636,7 +646,24 @@ function formURLFor(d){
 function upsertReq(d){
   var s=summary(d), ex=reqs.filter(function(r){ return r.summary===s; })[0];
   if(!ex){ ex={id:uid(),ts:new Date().toISOString(),kind:d.kind,summary:s,mail:false,form:false}; reqs.unshift(ex); if(reqs.length>30) reqs.length=30; }
+  ex.data=JSON.parse(JSON.stringify(d));
   return ex;
+}
+function dateText(iso){ return parseDateInput(mmdd(iso))===iso?mmdd(iso):iso.replace(/-/g,''); }
+function setVal(id,v){ var e=$(id); if(!e||v==null) return; e.value=v; e.dispatchEvent(new Event('input')); if(e.tagName==='SELECT') e.dispatchEvent(new Event('change')); }
+function fillApply(d){
+  kind=d.kind;
+  document.querySelectorAll('#seg-kind button').forEach(function(x){ var on=x.getAttribute('data-kind')===kind; x.classList.toggle('on',on); x.setAttribute('aria-pressed',on?'true':'false'); });
+  renderApply();
+  setTimeout(function(){
+    if(d.date) setVal('ap-date',dateText(d.date));
+    setVal('ap-start',d.start); setVal('ap-end',d.end); setVal('ap-reason',d.reason);
+    if(kind==='leave'){ setVal('ap-type',d.type); if(d.type==='__other__') setVal('ap-type-other',d.typeOther); setVal('ap-handover',d.handover); }
+    if(kind==='overtime') setVal('ap-comp',d.comp);
+    if(kind==='travel'){ setVal('ap-dest',d.dest); if(d.endDate) setVal('ap-end-date',dateText(d.endDate)); if($('ap-nooffice')) $('ap-nooffice').checked=d.noOffice!==false; setVal('ap-transport',d.transport); }
+    var n=$('apply-note'); n.textContent='已帶入「'+summary(d)+'」，確認內容後按下面的按鈕。';
+    $('tab-apply').scrollIntoView({behavior:'smooth',block:'start'});
+  },10);
 }
 $('btn-mail').addEventListener('click',function(){
   var d=applyData(), err=validate(d); if(err){ alert(err); return; }
@@ -664,7 +691,10 @@ function renderReqs(){
   var ul=$('req-list'); ul.innerHTML=''; $('req-empty').hidden=reqs.length>0;
   reqs.forEach(function(r){
     var li=el('li'), t=el('div',{class:'t'});
-    t.appendChild(el('div',{},[el('b',{text:KIND_LABEL[r.kind]||r.kind}),' ',r.summary]));
+    var head=el('button',{type:'button',class:'req-head'},[el('b',{text:KIND_LABEL[r.kind]||r.kind}),' ',r.summary]);
+    head.addEventListener('click',function(){ if(r.data) fillApply(r.data); else alert('這筆是舊版建立的，沒有存詳細內容。重新填一次之後，下次就能點這裡帶入。'); });
+    t.appendChild(head);
+    if(r.data) t.appendChild(el('div',{class:'small muted',text:'點上面一行可帶入內容'}));
     var row=el('div',{class:'row'});
     ['mail','form'].forEach(function(k){
       var c=el('input',{type:'checkbox'}); c.checked=!!r[k];
@@ -833,7 +863,7 @@ try{ renderPlaces(); renderStatus(); renderApply(); renderReqs(); }
 catch(e){ showTab('settings'); toast('設定讀取失敗，請重新貼設定碼（'+e.message+'）','err'); }
 if(!cfg) showTab('settings');
 renderSyncStatus(); syncNow(true);
-window.daka={version:'1.4',parseTimeInput:parseTimeInput,parseDateInput:parseDateInput,syncNow:syncNow,mailFor:mailFor,formURLFor:formURLFor,applyData:applyData};
+window.daka={version:'1.5',fillApply:fillApply,parseTimeInput:parseTimeInput,parseDateInput:parseDateInput,syncNow:syncNow,mailFor:mailFor,formURLFor:formURLFor,applyData:applyData};
 })();
 </script>
 </body>
