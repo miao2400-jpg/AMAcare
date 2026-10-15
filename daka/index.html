@@ -752,6 +752,7 @@ $('btn-apply-code').addEventListener('click',function(){
   cfg=obj;
   ['name','fullName','senderEmail','sync'].forEach(function(k){ if(!cfg[k]&&keep[k]) cfg[k]=keep[k]; });
   if(cfg.sync&&!(isSyncURL(cfg.sync.url)||!cfg.sync.url)) cfg.sync={url:'',token:''};
+  if(cfg.sync&&!cfg.sync.url&&keep.sync&&isSyncURL(keep.sync.url)) cfg.sync={url:keep.sync.url,token:cfg.sync.token||keep.sync.token};
   cfg.updatedAt=nowMs();
   ['submitMode','work','ccHr'].forEach(function(k){ if(cfg[k]==null&&keep[k]!=null) cfg[k]=keep[k]; });
   if(keep.supervisor&&keep.supervisor.email&&!(cfg.supervisor&&cfg.supervisor.email)) cfg.supervisor=keep.supervisor;
