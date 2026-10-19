@@ -90,6 +90,10 @@
   .hint{display:block;font-size:13px;color:var(--sub);margin-top:4px;min-height:18px}
   .hint.err{color:var(--danger);font-weight:600}
   .sync-ok{color:var(--safe)}
+  .day{border-top:1px solid var(--line);margin-top:14px;padding-top:4px}
+  .day-head{display:flex;justify-content:space-between;align-items:center;min-height:44px}
+  .day-head b{font-size:15px}
+  .day-x{font:inherit;font-size:14px;color:var(--danger);background:transparent;border:0;min-height:44px;padding:10px 4px}
   .req-head{font:inherit;color:var(--ink);background:transparent;border:0;padding:6px 0;text-align:left;width:100%;min-height:44px;text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:4px}
   @media (min-width:720px){
     header,main{max-width:640px;margin-left:auto;margin-right:auto}
@@ -160,6 +164,7 @@
     <button class="btn block" id="btn-copy-mail">複製信件內容</button>
     <p class="small" id="sender-hint" style="margin-top:6px" hidden></p>
     <button class="btn block" id="btn-form">② 開啟表單</button>
+    <div id="form-days"></div>
     <p class="small" style="margin-top:8px">信會在你的郵件 App 打開，看一眼再按傳送；打不開或開錯信箱時，用「複製信件內容」貼到 Outlook。表單會在 Safari 打開，已幫你預填，檢查後按提交。兩件都做完，再到下面把方框打勾。</p>
   </div>
   <div class="card">
@@ -242,7 +247,7 @@
   </div>
   <div class="card">
     <button class="btn danger block" id="btn-clear">清除這支手機上的所有資料</button>
-    <p class="small muted" style="margin-top:8px">版本 1.6 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
+    <p class="small muted" style="margin-top:8px">版本 1.7 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
   </div>
 </section>
 </main>
@@ -530,17 +535,58 @@ function dateField(id,label,iso){
   var w=el('div',{class:'f'},[el('span',{class:'small',text:label}),inp,hint]); w.style.margin='10px 0 0';
   setTimeout(upd,0); return w;
 }
+/* 請假可以一次請多天：每一天有自己的日期與時間，假別、事由共用。第一天沿用 ap-date / ap-start / ap-end */
+var daySeq=0;
+var ZH_NUM=['一','二','三','四','五','六','七','八','九','十'];
+function dayLabel(i){ return '第'+(ZH_NUM[i]||String(i+1))+'天'; }
+function workHours(){ return {ws:normHM(cfg&&cfg.work&&cfg.work.start,'09:00'), we:normHM(cfg&&cfg.work&&cfg.work.end,'18:00')}; }
+function nextWorkday(iso){ var d=parseISO(iso); do{ d.setDate(d.getDate()+1); }while(d.getDay()===0||d.getDay()===6); return todayISO(d); }
+function addLeaveDay(v){
+  var n=++daySeq, sfx=(n===1?'':'-'+n), wh=workHours();
+  var blk=el('div',{class:'day'}), head=el('div',{class:'day-head'},[el('b',{class:'day-label'})]);
+  if(n>1){ var x=el('button',{type:'button',class:'day-x',text:'移除這天'}); x.addEventListener('click',function(){ blk.remove(); relabelDays(); $('form-days').innerHTML=''; }); head.appendChild(x); }
+  var full=el('button',{type:'button',class:'chip',text:'全天'});
+  full.addEventListener('click',function(){ setVal('ap-start'+sfx,wh.ws); setVal('ap-end'+sfx,wh.we); });
+  blk.appendChild(head);
+  blk.appendChild(dateField('ap-date'+sfx,'請假日期',v.date));
+  blk.appendChild(el('div',{class:'chips',style:'margin-top:10px'},[full]));
+  blk.appendChild(timeField('ap-start'+sfx,'起始時間','leave.start',v.start,[wh.ws,'13:00','14:00']));
+  blk.appendChild(timeField('ap-end'+sfx,'結束時間','leave.end',v.end,[wh.we,'12:00','17:00']));
+  blk.setAttribute('data-sfx',sfx);
+  $('ap-days').appendChild(blk); relabelDays(); $('form-days').innerHTML='';
+  return blk;
+}
+function relabelDays(){
+  var bs=document.querySelectorAll('#ap-days .day'), multi=bs.length>1;
+  bs.forEach(function(b,i){ var h=b.querySelector('.day-head'); h.hidden=!multi; h.querySelector('.day-label').textContent=dayLabel(i); b.style.borderTop=(i===0?'0':''); b.style.marginTop=(i===0?'0':''); });
+}
+function leaveDays(){
+  return Array.prototype.map.call(document.querySelectorAll('#ap-days .day'),function(b){
+    var sfx=b.getAttribute('data-sfx'), st=parseTimeInput($('ap-start'+sfx).value), en=parseTimeInput($('ap-end'+sfx).value);
+    return {date:parseDateInput($('ap-date'+sfx).value), start:st, end:en, hours:leaveHours(st,en)};
+  });
+}
+function isFullDay(day){ var wh=workHours(); return !!day.start&&!!day.end&&toMin(day.start)<=toMin(wh.ws)&&toMin(day.end)>=toMin(wh.we); }
+/* 合計：整天算「天」，其他算「小時」，例如 共2天、共6小時、共2天又3小時 */
+function leaveTotal(days){
+  var full=0, hrs=0; days.forEach(function(x){ if(isFullDay(x)) full++; else hrs+=x.hours; });
+  hrs=Math.round(hrs*10)/10;
+  return '共'+(full?full+'天':'')+(full&&hrs?'又':'')+(hrs||!full?hrs+'小時':'');
+}
+function leaveTimeText(day){ return day.start+' – '+day.end+(isFullDay(day)?'（全天）':'（共'+day.hours+'小時）'); }
 function renderApply(){
-  var box=$('apply-fields'); box.innerHTML='';
+  var box=$('apply-fields'); box.innerHTML=''; $('form-days').innerHTML=''; daySeq=0;
   var ws=normHM(cfg&&cfg.work&&cfg.work.start,'09:00'), we=normHM(cfg&&cfg.work&&cfg.work.end,'18:00');
   var note=$('apply-note'); note.textContent='';
   if(kind==='leave'){
     var types=strList(cfg&&cfg.forms&&cfg.forms.leave&&cfg.forms.leave.types,['事假','病假','特別休假']).map(function(t){return {v:t,t:t};}).concat([{v:'__other__',t:'其他'}]);
     box.appendChild(field('ap-type','假別','select',types[0].v,types));
     var ow=field('ap-type-other','其他假別','text','',{placeholder:'例如：公假'}); ow.id='ap-type-other-wrap'; ow.hidden=true; box.appendChild(ow);
-    box.appendChild(dateField('ap-date','請假日期',todayISO()));
-    box.appendChild(timeField('ap-start','起始時間','leave.start',ws,[ws,'13:00','14:00']));
-    box.appendChild(timeField('ap-end','結束時間','leave.end',we,[we,'12:00','17:00']));
+    box.appendChild(el('div',{id:'ap-days'}));
+    addLeaveDay({date:todayISO(),start:ws,end:we});
+    var more=el('button',{type:'button',class:'btn block',id:'btn-add-day',text:'＋ 加一天'});
+    more.addEventListener('click',function(){ var ds=leaveDays(), last=ds[ds.length-1]||{}; addLeaveDay({date:nextWorkday(last.date||todayISO()),start:last.start||ws,end:last.end||we}); });
+    box.appendChild(more);
     box.appendChild(field('ap-reason','請假事由','text','',{placeholder:'例如：家裡有事要處理'}));
     box.appendChild(field('ap-handover','工作交接（選填）','text','',{placeholder:'例如：已交接給同事○○'}));
     $('ap-type').addEventListener('change',function(){ $('ap-type-other-wrap').hidden=(this.value!=='__other__'); });
@@ -574,10 +620,26 @@ function applyData(){
   if(kind==='leave'){ d.type=$('ap-type').value; d.typeOther=($('ap-type-other')?$('ap-type-other').value:'').trim(); d.typeLabel=(d.type==='__other__'?d.typeOther:d.type); }
   if(kind==='overtime'){ d.comp=$('ap-comp').value; d.compLabel=d.comp.split('(')[0]; var span=toMin(d.end)-toMin(d.start); d.nextDay=span<0; if(span<0) span+=1440; d.hours=Math.round(span/60*10)/10; }
   if(kind==='travel'){ d.dest=($('ap-dest').value||'').trim(); d.endDate=parseDateInput($('ap-end-date').value)||d.date; d.noOffice=$('ap-nooffice').checked; d.transport=($('ap-transport').value||'').trim(); }
-  if(kind==='leave'){ d.handover=($('ap-handover').value||'').trim(); d.hours=leaveHours(d.start,d.end); }
+  if(kind==='leave'){
+    d.handover=($('ap-handover').value||'').trim();
+    d.days=leaveDays().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; });
+    var d0=d.days[0]||{}; d.date=d0.date||''; d.start=d0.start||''; d.end=d0.end||''; d.hours=d0.hours||0;
+    d.total=leaveTotal(d.days);
+  }
   return d;
 }
 function validate(d){
+  if(d.days){
+    var seen={}, multi=d.days.length>1, raw=leaveDays();
+    for(var i=0;i<raw.length;i++){
+      var x=raw[i], who=multi?dayLabel(i)+'：':'';
+      if(!x.date) return who+'請輸入日期，例如 1020';
+      if(!x.start||!x.end) return who+'請輸入時間，例如 0930 或 1630';
+      if(toMin(x.end)<=toMin(x.start)) return who+'結束時間要在起始時間之後';
+      if(seen[x.date]) return fmtMD(x.date)+' 重複了，請改日期或移除一天';
+      seen[x.date]=1;
+    }
+  }
   if(!d.date) return '請輸入日期，例如 1020';
   if(kind==='leave'&&!d.typeLabel) return '請選假別';
   if(kind==='travel'&&!d.dest) return '請填地點';
@@ -587,9 +649,10 @@ function validate(d){
   if(kind==='travel'&&d.endDate<d.date) return '結束日不能早於出發日';
   return '';
 }
-function recordUse(d){ bumpFreq(d.kind+'.start',d.start); bumpFreq(d.kind+'.end',d.end); }
+function recordUse(d){ (d.days||[d]).forEach(function(x){ bumpFreq(d.kind+'.start',x.start); bumpFreq(d.kind+'.end',x.end); }); }
 function renderSenderHint(){ var h=$('sender-hint'), e=cfg&&cfg.senderEmail; h.hidden=!e; if(e) h.textContent='寄出前確認寄件者是 '+e+'。'; }
 function summary(d){
+  if(d.kind==='leave'&&d.days&&d.days.length>1) return d.days.map(function(x){ var q=x.date.split('-'); return (+q[1])+'/'+(+q[2]); }).join('、')+' '+d.typeLabel+' '+d.total;
   if(d.kind==='leave') return fmtMD(d.date)+' '+d.start+'–'+d.end+' '+d.typeLabel;
   if(d.kind==='overtime') return fmtMD(d.date)+' 加班 '+d.start+'–'+(d.nextDay?'翌日':'')+d.end;
   return (d.endDate&&d.endDate!==d.date?fmtMD(d.date)+'–'+fmtMD(d.endDate):fmtMD(d.date))+' 出差 '+d.dest;
@@ -600,13 +663,20 @@ function mailFor(d){
   var c=cfg||{}, sig=c.name||'', full=c.fullName||c.name||'', sup=(c.supervisor&&c.supervisor.title)||'', hr=(c.hr&&c.hr.name)||'';
   var label={leave:'請假',overtime:'加班',travel:'差旅'}[d.kind];
   var subject='['+label+'申請] '+full+' '+fmtDot(d.date);
+  if(d.kind==='leave'&&d.days&&d.days.length){
+    subject='['+label+'申請] '+full+' '+d.days.map(function(x,i){ return (i&&x.date.slice(0,4)===d.days[0].date.slice(0,4))?fmtDot(x.date).slice(5):fmtDot(x.date); }).join(' & ')+'（'+d.total+'）';
+  }
   var lines=[(sup||'主管')+'好：','','以下為'+label+'申請，再麻煩協助確認並轉寄給'+(hr||'人資')+'覆核，謝謝！',''];
   if(d.kind==='leave'){
-    lines.push('・假別：'+d.typeLabel);
-    lines.push('・日期：'+fmtDWk(d.date));
-    lines.push('・時間：'+d.start+' – '+d.end+'（共'+d.hours+'小時）');
-    lines.push('・事由：'+d.reason);
-    if(d.handover) lines.push('・工作交接：'+d.handover);
+    var days=(d.days&&d.days.length)?d.days:[{date:d.date,start:d.start,end:d.end,hours:d.hours}];
+    days.forEach(function(x,i){
+      if(days.length>1){ if(i) lines.push(''); lines.push(dayLabel(i)); }
+      lines.push('・假別：'+d.typeLabel);
+      lines.push('・日期：'+fmtDWk(x.date));
+      lines.push('・時間：'+leaveTimeText(x));
+      lines.push('・事由：'+d.reason);
+    });
+    if(d.handover){ if(days.length>1) lines.push(''); lines.push('・工作交接：'+d.handover); }
   } else if(d.kind==='overtime'){
     lines.push('・日期：'+fmtDWk(d.date));
     lines.push('・時間：'+d.start+' – '+(d.nextDay?'翌日':'')+d.end+'（共'+d.hours+'小時）');
@@ -661,6 +731,7 @@ function fillApply(d){
   setTimeout(function(){
     if(d.date) setVal('ap-date',dateText(d.date));
     setVal('ap-start',d.start); setVal('ap-end',d.end); setVal('ap-reason',d.reason);
+    if(kind==='leave'&&d.days) d.days.slice(1).forEach(function(x){ var b=addLeaveDay({date:x.date,start:x.start,end:x.end}), sfx=b.getAttribute('data-sfx'); setVal('ap-date'+sfx,dateText(x.date)); });
     if(kind==='leave'){ setVal('ap-type',d.type); if(d.type==='__other__') setVal('ap-type-other',d.typeOther); setVal('ap-handover',d.handover); }
     if(kind==='overtime') setVal('ap-comp',d.comp);
     if(kind==='travel'){ setVal('ap-dest',d.dest); if(d.endDate) setVal('ap-end-date',dateText(d.endDate)); if($('ap-nooffice')) $('ap-nooffice').checked=d.noOffice!==false; setVal('ap-transport',d.transport); }
@@ -687,8 +758,21 @@ $('btn-form').addEventListener('click',function(){
   if(!hasForm(d.kind)){ showTab('settings'); toast('設定碼裡沒有這張表單，請重新產生設定碼','err'); return; }
   var url=formURLFor(d); if(!url){ showTab('settings'); toast('表單網址無效，請重新套用設定碼','err'); return; }
   upsertReq(d); save(KEY_REQ,reqs); renderReqs(); recordUse(d);
+  if(d.days&&d.days.length>1){ renderFormDays(d); return; }
   if(!openExternal(url)){ var n=$('apply-note'); n.innerHTML=''; n.appendChild(el('a',{href:url,target:'_blank',rel:'noopener',class:'btn primary block',text:'打開表單'})); }
 });
+$('apply-fields').addEventListener('input',function(){ $('form-days').innerHTML=''; });
+/* 表單一次只能填一天：多天請假時每天一顆按鈕，各自預填那一天 */
+function renderFormDays(d){
+  var box=$('form-days'); box.innerHTML='';
+  box.appendChild(el('p',{class:'small',style:'margin-top:8px',text:'表單一次只能填一天，請每一天各開一次、各按一次提交：'}));
+  d.days.forEach(function(x,i){
+    var url=formURLFor(Object.assign({},d,{date:x.date,start:x.start,end:x.end,days:null}));
+    var b=el('a',{href:url,target:'_blank',rel:'noopener',class:'btn block',text:'開啟表單（'+dayLabel(i)+' '+fmtMD(x.date)+'）'});
+    b.addEventListener('click',function(){ b.textContent='✓ 已開啟（'+dayLabel(i)+' '+fmtMD(x.date)+'）'; });
+    box.appendChild(b);
+  });
+}
 var KIND_LABEL={leave:'請假',overtime:'加班',travel:'差旅'};
 function renderReqs(){
   var ul=$('req-list'); ul.innerHTML=''; $('req-empty').hidden=reqs.length>0;
