@@ -242,7 +242,7 @@
   </div>
   <div class="card">
     <button class="btn danger block" id="btn-clear">清除這支手機上的所有資料</button>
-    <p class="small muted" style="margin-top:8px">版本 1.5 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
+    <p class="small muted" style="margin-top:8px">版本 1.6 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
   </div>
 </section>
 </main>
@@ -329,17 +329,19 @@ function renderPlaces(){
   var ci=cfg&&cfg.forms&&cfg.forms.clockin;
   var list=strList(ci&&ci.places, DEFAULT_PLACES).filter(function(p){ return p!=='其他'; });
   if(!ci||ci.placeOther!==false) list=list.concat(['其他']);
+  /* 「其他」只算當天：隔天回到第一個地點並清空文字，避免沿用前一天的地點 */
+  if(prefs.place==='其他'&&prefs.otherDay!==todayISO()){ prefs.place=''; prefs.other=''; }
   if(list.indexOf(prefs.place)<0){ prefs.place=list[0]; save(KEY_PREF,prefs); }
   list.forEach(function(p){
     var b=el('button',{type:'button',text:p,'aria-pressed':prefs.place===p?'true':'false'});
     if(prefs.place===p) b.classList.add('on');
-    b.addEventListener('click',function(){ prefs.place=p; save(KEY_PREF,prefs); renderPlaces(); });
+    b.addEventListener('click',function(){ prefs.place=p; if(p==='其他') prefs.otherDay=todayISO(); save(KEY_PREF,prefs); renderPlaces(); });
     seg.appendChild(b);
   });
   $('other-wrap').hidden=(prefs.place!=='其他');
   $('place-other').value=prefs.other||'';
 }
-$('place-other').addEventListener('input',function(){ prefs.other=this.value; save(KEY_PREF,prefs); });
+$('place-other').addEventListener('input',function(){ prefs.other=this.value; prefs.otherDay=todayISO(); save(KEY_PREF,prefs); });
 
 function liveLog(){ return log.filter(function(r){ return !r.deleted; }); }
 function nowMs(){ return Date.now(); }
@@ -454,7 +456,7 @@ function refresh(ev){
     ['ap-date','ap-end-date'].forEach(function(id){ var e=$(id); if(e&&parseDateInput(e.value)===shownDay){ e.value=mmdd(t); e.dispatchEvent(new Event('input')); } });
     var cur=liveLog().filter(function(r){ return r.id===lastEntryId; })[0];
     if(!(cur&&(cur.status==='unconfirmed'||cur.status==='pending'))){ clearTimeout(waitTimer); $('result-card').hidden=true; $('result-frame').innerHTML=''; lastEntryId=null; }
-    shownDay=t;
+    shownDay=t; renderPlaces();
   }
   renderStatus();
   syncNow(false, !!(ev&&ev.type));
