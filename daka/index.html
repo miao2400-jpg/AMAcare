@@ -263,10 +263,11 @@
 var KEY_CFG='daka.config', KEY_LOG='daka.log', KEY_REQ='daka.requests', KEY_PREF='daka.prefs', KEY_FREQ='daka.freq', KEY_SYNC='daka.sync';
 function load(k,def){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }
 function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ alert('無法儲存：'+e.message); } }
-var cfg=load(KEY_CFG,null), log=load(KEY_LOG,[]), reqs=load(KEY_REQ,[]), prefs=load(KEY_PREF,{place:'',other:''});
+var cfg=load(KEY_CFG,null), log=load(KEY_LOG,[]), reqs=load(KEY_REQ,[]), prefs={place:'',other:''};
+try{ localStorage.removeItem(KEY_PREF); }catch(e){}
 var freq=load(KEY_FREQ,{}), syncState=load(KEY_SYNC,{});
 if(!freq||typeof freq!=='object') freq={}; if(!syncState||typeof syncState!=='object') syncState={};
-if(!Array.isArray(log)) log=[]; if(!Array.isArray(reqs)) reqs=[]; if(!prefs||typeof prefs!=='object') prefs={place:'',other:''};
+if(!Array.isArray(log)) log=[]; if(!Array.isArray(reqs)) reqs=[];
 
 /* ───────── 工具 ───────── */
 function $(id){ return document.getElementById(id); }
@@ -329,19 +330,19 @@ function renderPlaces(){
   var ci=cfg&&cfg.forms&&cfg.forms.clockin;
   var list=strList(ci&&ci.places, DEFAULT_PLACES).filter(function(p){ return p!=='其他'; });
   if(!ci||ci.placeOther!==false) list=list.concat(['其他']);
-  /* 「其他」只算當天：隔天回到第一個地點並清空文字，避免沿用前一天的地點 */
-  if(prefs.place==='其他'&&prefs.otherDay!==todayISO()){ prefs.place=''; prefs.other=''; }
-  if(list.indexOf(prefs.place)<0){ prefs.place=list[0]; save(KEY_PREF,prefs); }
+  if(list.indexOf(prefs.place)<0) prefs.place=list[0];
   list.forEach(function(p){
     var b=el('button',{type:'button',text:p,'aria-pressed':prefs.place===p?'true':'false'});
     if(prefs.place===p) b.classList.add('on');
-    b.addEventListener('click',function(){ prefs.place=p; if(p==='其他') prefs.otherDay=todayISO(); save(KEY_PREF,prefs); renderPlaces(); });
+    b.addEventListener('click',function(){ prefs.place=p; renderPlaces(); });
     seg.appendChild(b);
   });
   $('other-wrap').hidden=(prefs.place!=='其他');
   $('place-other').value=prefs.other||'';
 }
-$('place-other').addEventListener('input',function(){ prefs.other=this.value; prefs.otherDay=todayISO(); save(KEY_PREF,prefs); });
+$('place-other').addEventListener('input',function(){ prefs.other=this.value; });
+/* 地點不記憶：每次打開 App、跨日、打完卡都回到第一個地點（汐止辦公室） */
+function resetPlace(){ prefs.place=''; prefs.other=''; renderPlaces(); }
 
 function liveLog(){ return log.filter(function(r){ return !r.deleted; }); }
 function nowMs(){ return Date.now(); }
@@ -371,14 +372,14 @@ function renderStatus(){
 }
 
 var TYPE_LABEL={in:'上班',out:'下班',trip:'上班時間公出'};
-var lockUntil=0, lastEntryId=null, lastType=null, waitTimer=null;
+var lockUntil=0, lastEntryId=null, lastType=null, lastPlace=null, waitTimer=null;
 function setStatus(id,st){ log.forEach(function(r){ if(r.id===id){ r.status=st; r.updatedAt=nowMs(); } }); saveLog(); }
 function showErr(msg){ var e=$('result-err'); e.textContent=msg; e.hidden=false; }
 function placeValue(){ return prefs.place==='其他'?('其他:'+(prefs.other||'').trim()):prefs.place; }
-function prefillURL(type){
-  var f=cfg.forms.clockin, p={usp:'pp_url'};
+function prefillURL(type,pl){
+  var f=cfg.forms.clockin, p={usp:'pp_url'}; pl=pl||prefs;
   p[f.reason]=TYPE_LABEL[type]||'上班';
-  if(prefs.place==='其他'){ p[f.place]='__other_option__'; p[f.place+'.other_option_response']=(prefs.other||'').trim(); } else p[f.place]=prefs.place;
+  if(pl.place==='其他'){ p[f.place]='__other_option__'; p[f.place+'.other_option_response']=(pl.other||'').trim(); } else p[f.place]=pl.place;
   return f.url+'?'+qs(p);
 }
 function setLocked(on){ ['btn-in','btn-out','btn-trip'].forEach(function(id){ $(id).disabled=on; }); }
@@ -395,7 +396,7 @@ function punch(type){
   clearTimeout(waitTimer); $('result-err').hidden=true; $('btn-confirm').hidden=true;
   var entry={id:uid(),ts:now.toISOString(),date:todayISO(now),time:nowHM(now),type:type,place:placeValue(),status:(mode==='iframe'?'pending':'unconfirmed')};
   entry.updatedAt=nowMs(); entry.device=deviceLabel();
-  log.push(entry); saveLog(); lastEntryId=entry.id; lastType=type;
+  log.push(entry); saveLog(); lastEntryId=entry.id; lastType=type; lastPlace={place:prefs.place,other:prefs.other};
   lockUntil=Date.now()+8000; setLocked(true); setTimeout(function(){ setLocked(false); },8000);
   if(mode==='iframe'){
     var fields={}, token=fbzx();
@@ -414,13 +415,13 @@ function punch(type){
     $('result-title').textContent='已送出 '+TYPE_LABEL[type]+' '+entry.time;
     body.textContent='地點：'+entry.place+'。下面是 Google 的畫面，看到 Google 說已收到回覆（例如「我們已經收到你回覆的表單」）才算完成。如果下面是空白，或又出現整張表單、有紅字，代表沒送到 Google：按「沒成功？刪除這筆」，再用「改用表單網頁重打這筆」。';
   } else {
-    var url=prefillURL(type), opened=openExternal(url);
+    var url=prefillURL(type,lastPlace), opened=openExternal(url);
     $('result-title').textContent='已開啟 '+TYPE_LABEL[type]+' '+entry.time;
     if(opened) body.textContent='地點：'+entry.place+'。表單已在 Safari 打開並預選好，請按「提交」。看到「已收到回覆」後，回來按下面的按鈕。';
     else { body.textContent='地點：'+entry.place+'。請按下面的「打開表單」，在 Safari 按「提交」，看到「已收到回覆」後回來按「我已在 Safari 按了提交」。'; openLink(holder,url,'打開表單'); }
     $('btn-confirm').hidden=false;
   }
-  $('result-card').hidden=false; renderStatus();
+  $('result-card').hidden=false; renderStatus(); resetPlace();
   $('result-card').scrollIntoView({behavior:'smooth',block:'start'});
 }
 $('btn-in').addEventListener('click',function(){ punch('in'); });
@@ -438,7 +439,7 @@ $('btn-undo').addEventListener('click',function(){
 });
 $('btn-open-form').addEventListener('click',function(){
   if(!hasForm('clockin')) return;
-  var url=prefillURL(lastType||'in');
+  var url=prefillURL(lastType||'in',lastPlace);
   if(!openExternal(url)) openLink($('result-frame'),url,'打開表單');
 });
 $('btn-test-open').addEventListener('click',function(){
@@ -456,7 +457,7 @@ function refresh(ev){
     ['ap-date','ap-end-date'].forEach(function(id){ var e=$(id); if(e&&parseDateInput(e.value)===shownDay){ e.value=mmdd(t); e.dispatchEvent(new Event('input')); } });
     var cur=liveLog().filter(function(r){ return r.id===lastEntryId; })[0];
     if(!(cur&&(cur.status==='unconfirmed'||cur.status==='pending'))){ clearTimeout(waitTimer); $('result-card').hidden=true; $('result-frame').innerHTML=''; lastEntryId=null; }
-    shownDay=t; renderPlaces();
+    shownDay=t; resetPlace();
   }
   renderStatus();
   syncNow(false, !!(ev&&ev.type));
@@ -800,7 +801,7 @@ $('btn-clear').addEventListener('click',function(){
   if(!confirm('確定清除設定、打卡紀錄、申請紀錄？')) return;
   [KEY_CFG,KEY_LOG,KEY_REQ,KEY_PREF,KEY_FREQ,KEY_SYNC].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
   cfg=null; log=[]; reqs=[]; prefs={place:'',other:''}; freq={}; syncState={}; clearTimeout(syncTimer);
-  clearTimeout(waitTimer); lastEntryId=null; lastType=null; lockUntil=0; setLocked(false);
+  clearTimeout(waitTimer); lastEntryId=null; lastType=null; lastPlace=null; lockUntil=0; setLocked(false);
   $('result-card').hidden=true; $('result-frame').innerHTML=''; $('result-err').hidden=true; $('btn-confirm').hidden=true;
   renderSettings(); renderStatus(); renderPlaces(); renderLog(); renderReqs(); renderApply(); showTab('settings');
 });
