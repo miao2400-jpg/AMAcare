@@ -247,7 +247,7 @@
   </div>
   <div class="card">
     <button class="btn danger block" id="btn-clear">清除這支手機上的所有資料</button>
-    <p class="small muted" style="margin-top:8px">版本 1.7 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
+    <p class="small muted" style="margin-top:8px">版本 1.8 · 紀錄與設定只存在這支手機，這個 App 本身不會上傳任何資料；打卡內容只會送到 HR 的 Google 表單。</p>
   </div>
 </section>
 </main>
@@ -669,14 +669,21 @@ function mailFor(d){
   var lines=[(sup||'主管')+'好：','','以下為'+label+'申請，再麻煩協助確認並轉寄給'+(hr||'人資')+'覆核，謝謝！',''];
   if(d.kind==='leave'){
     var days=(d.days&&d.days.length)?d.days:[{date:d.date,start:d.start,end:d.end,hours:d.hours}];
-    days.forEach(function(x,i){
+    /* 全部都是整天：日期列成一行、寫天數，不分「第一天、第二天」 */
+    if(days.every(isFullDay)){
+      lines.push('・假別：'+d.typeLabel);
+      lines.push('・日期：'+days.map(function(x){ return fmtDWk(x.date); }).join('、'));
+      lines.push('・天數：'+days.length+'天');
+      lines.push('・事由：'+d.reason);
+      if(d.handover) lines.push('・工作交接：'+d.handover);
+    } else days.forEach(function(x,i){
       if(days.length>1){ if(i) lines.push(''); lines.push(dayLabel(i)); }
       lines.push('・假別：'+d.typeLabel);
       lines.push('・日期：'+fmtDWk(x.date));
       lines.push('・時間：'+leaveTimeText(x));
       lines.push('・事由：'+d.reason);
     });
-    if(d.handover){ if(days.length>1) lines.push(''); lines.push('・工作交接：'+d.handover); }
+    if(d.handover&&!days.every(isFullDay)){ if(days.length>1) lines.push(''); lines.push('・工作交接：'+d.handover); }
   } else if(d.kind==='overtime'){
     lines.push('・日期：'+fmtDWk(d.date));
     lines.push('・時間：'+d.start+' – '+(d.nextDay?'翌日':'')+d.end+'（共'+d.hours+'小時）');
